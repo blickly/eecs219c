@@ -1,0 +1,41 @@
+%        File: lickly_hw1.tex
+%      Author: Ben Lickly
+%     Created: Tue Sep 29 04:00 PM 2009 P
+%
+\documentclass{amsart}
+\title{EECS 219C: HW \#1}
+\author{Ben Lickly}
+\date{September 30, 2009}
+\begin{document}
+
+\begin{enumerate}
+  \item Renamable Horn-SAT
+  \item DLL Algorithm and Exponential Search
+  \item Experimenting with a SAT Solver
+  \item Comparing head-tail pointers with 2-literal watching
+    \begin{enumerate}
+      \item Show how one tracks literals
+      \item Perform \ldots
+    \end{enumerate}
+  \item BDDs
+    Claim: The number of nodes in the $i$th layer of the BDD of a symmetric
+    boolean function is $i$.  Thus, the total number of nodes in the BDD is
+    $\frac{n (n+1)}{2}$, which is $O(n^2)$.
+\begin{proof}
+  (By induction)
+
+  Base case: The binary decision diagram for a 1-argument function is has size
+  1, for the single variable.
+
+  Inductive case:  Assume that there are $i$ nodes in the $i$th layer of a BDD.
+  Clearly, there are $2i$ edges that come out of this layer.
+  Since the function is symmetric, however, not all of these edges have unique
+  states.  In particular, only two edges (corresponding to all 0s and all 1s)
+  will be unique.  The remaining $2i - 2$ edges will have two edges going into
+  each node, meaning that the $i+1$st layer will have $\frac{2i -2}{2} + 2$
+  nodes, which is exactly $i+1$.
+\end{proof}
+\end{enumerate}
+
+\end{document}
+
