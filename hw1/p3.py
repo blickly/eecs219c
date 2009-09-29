@@ -7,24 +7,20 @@ def xbuilder(n):
 
 def pigeonhole(n):
   x = xbuilder(n)
-  clauses = ""
-  nClauses = 0
+  nVars = n * (n-1)
+  nClauses = n * (n-1) * (n-1) + n
+  output =  "c Pigeon-hole sat problem (size=%d)\n" % n
+  output += "p cnf %d %d\n" % (nVars, nClauses)
   for i in xrange(1,n+1):
     for j in xrange(1,n):
-      clauses += "%d " % x(i,j)
-    clauses += "0\n"
-    nClauses += 1
+      output += "%d " % x(i,j)
+    output += "0\n"
   for i in xrange(1,n+1):
     for j in xrange(1,n+1):
       for k in xrange(1,n):
         if i != j:
-          clauses += "-%d -%d 0\n" % (x(i,k), x(j,k))
-          nClauses += 1
-  nVars = n * (n-1)
-  clauses = ("c Pigeon-hole sat problem (size=%d)\n" % i
-           + "p cnf %d %d\n" % (nVars, nClauses)
-           + clauses )
-  return clauses
+          output += "-%d -%d 0\n" % (x(i,k), x(j,k))
+  return output
 
 def main():
   for i in xrange(4,11):
