@@ -8,16 +8,49 @@
 \date{September 30, 2009}
 \begin{document}
 
+\newcommand{\no}[1]{\overline{#1}}
+\newcommand{\lef}[1]{\overrightarrow{#1}}
+\newcommand{\ri}[1]{\overleftarrow{#1}}
+\newcommand{\po}[1]{\overbrace{#1}}
 \begin{enumerate}
   \item Renamable Horn-SAT
   \item DLL Algorithm and Exponential Search
   \item Experimenting with a SAT Solver
   \item Comparing head-tail pointers with 2-literal watching
     \begin{enumerate}
-      \item Show how one tracks literals
-      \item Perform \ldots
+      \item For the Head-Tail scheme, state how one detects if the clause becomes a unit clause and a conflict clause.
+
+        One detects a unit clause when the head literal and tail literal are
+        the same. A conflict clause is created when this literal is negated.
+      \item Consider the following clause:
+        \begin{align*}
+          (x_1 \, \no{x_2} \, x_4 \, \no{x_6} \, x_7 \, x_{10} \, x_{15})
+        \end{align*}
+SATO's Head-Tail scheme:
+\begin{align*}
+1.\qquad&(x_1\, \lef{\no{x_2}}\, x_4\, \no{x_6}\, x_7\, x_{10}\, \ri{x_{15}})\\
+2.\qquad&(x_1\, \lef{\no{x_2}}\, x_4\, \no{x_6}\, x_7\, x_{10}\, \ri{x_{15}})\\
+3.\qquad&(x_1\, \lef{\no{x_2}}\, x_4\, \ri{\no{x_6}}\, x_7\, x_{10}\, x_{15})\\
+4.\qquad&(x_1\, \no{x_2}\, x_4\, \lef{\ri{\no{x_6}}}\, x_7\, x_{10}\, x_{15})
+\text{ (Unit clause implies $x_6 = 0$)} \\
+5.\qquad&(x_1\, \lef{\no{x_2}}\, x_4\, \no{x_6}\, x_7\, x_{10}\, \ri{x_{15}})\\
+6.\qquad&(x_1\, \lef{\no{x_2}}\, x_4\, \no{x_6}\, x_7\, x_{10}\, \ri{x_{15}})
+\text{ (Clause is now satisfied by $x_2$ assignment)} \\
+\end{align*}
+Chaff’s 2-literal watching:
+\begin{align*}
+1.\qquad&(x_1\, \po{\no{x_2}}\, \po{x_4}\, \no{x_6}\, x_7\, x_{10}\, x_{15})\\
+2.\qquad&(x_1\, \po{\no{x_2}}\, x_4\, \po{\no{x_6}}\, x_7\, x_{10}\, x_{15})\\
+3.\qquad&(x_1\, \po{\no{x_2}}\, x_4\, \po{\no{x_6}}\, x_7\, x_{10}\, x_{15})\\
+4.\qquad&(x_1\, \no{x_2}\, x_4\, \po{\no{x_6}}\, x_7\, x_{10}\, x_{15})
+\text{ (Unit clause implies $x_6 = 0$)} \\
+5.\qquad&(x_1\, \po{\no{x_2}}\, \po{x_4}\, \no{x_6}\, x_7\, x_{10}\, x_{15})\\
+5.\qquad&(x_1\, \po{\no{x_2}}\, \po{x_4}\, \no{x_6}\, x_7\, x_{10}\, x_{15})
+\text{ (Clause is now satisfied by $x_2$ assignment)} \\
+\end{align*}
     \end{enumerate}
   \item BDDs
+
     Claim: The number of nodes in the $i$th layer of the BDD of a symmetric
     boolean function is $i$.  Thus, the total number of nodes in the BDD is
     $\frac{n (n+1)}{2}$, which is $O(n^2)$.
