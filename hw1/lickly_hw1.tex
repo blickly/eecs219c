@@ -17,14 +17,12 @@
   \item Renamable Horn-SAT
   \item DLL Algorithm and Exponential Search
 Claim: No matter which variable we branch on, the total number of branches
-will be exponential in $n$, the number of pidgeons.
+will be exponential in $n$, the number of pigeons.
 \begin{proof}
 Let $x_{ij}$ be an arbitrarily chosen variable corresponding to putting bird
 $i$ in hole $j$.
-We will claim that no matter which way this varibale is branched, the
+We will claim that no matter which way this variable is branched, the
 resulting problem will be at least as big as an $n-1$ sized version.
-Since the overall problem is unsatisfiable, both branches need to be explored.
-The solution to the recurrence $T(n) = 2\times T(n-1)$ is $O(2^n)$.
 
 Case 1: $x_{ij} = true$ \\
 In this case, we can discard from the first set of constraints
@@ -35,8 +33,22 @@ Thus, we are left with exactly the problem of fitting $n-1$ pigeons
 in $n-2$ holes, which is exactly the $n-1$ sized problem.
 
 Case 2: $x_{ij} = false$ \\
-Here, we use the intuition that %FIXME
+In this case, we assume that pigeon $i$ does not fit in hole $j$.
+By the constraint in the first set that refers to pigeon $i$, we are left
+with $n-2$ potential holes for pigeon $i$.
+Certainly, it would not make the problem more difficult if we had an oracle
+that alerted us that certain branchings lead to an unsatisfiable (since
+this only serves to prune our search space).
+In particular, consider what would happen if we had an oracle that
+told us that placing the pigeon in $n-3$ of the remaining holes would result
+in an unsatisfiable problem.
+This would lead to a unit clause that forced the pigeon to be in the final
+hole, leaving us with exactly the $n-1$ sized problem.
 
+Since the overall problem is unsatisfiable, both branches on
+$x_{ij}$ need to be explored.
+This leads to the recurrence $T(n) = 2\times T(n-1)$,
+whose solution is $O(2^n)$.
 \end{proof}
   \item Experimenting with a SAT Solver
   \item Comparing head-tail pointers with 2-literal watching
