@@ -7,6 +7,8 @@
 \author{Ben Lickly}
 \date{September 30, 2009}
 
+\usepackage{algorithm2e}
+
 \newcommand{\no}[1]{\overline{#1}}
 \newcommand{\lef}[1]{\overrightarrow{#1}}
 \newcommand{\ri}[1]{\overleftarrow{#1}}
@@ -15,6 +17,48 @@
 \begin{document}
 \begin{enumerate}
   \item Renamable Horn-SAT
+    \begin{enumerate}
+      \item Give a linear-time algorithm to decide the satisfiability of
+	HornSAT formulas.
+
+Let the number of variables be $n$.
+\begin{algorithm}
+$solution \leftarrow \operatorname{False}^n$ \;
+\While{there exists a positive unit clause $x_j$} {
+  \If {there exists a negative unit clause $\neg x_j$} {
+     return ``Unsatisfiable''
+  }
+  $solution \leftarrow solution[x_j = \operatorname{True}]$ \;
+  Remove all clauses that contain $x_j$ \;
+  Remove $\neg x_j$ from all remaining clauses \;
+}
+return  $solution$
+\end{algorithm}
+Since this algorithm only considers each literal at most once,
+its runtime is linear in the total number of literals.
+      \item Give a polynomial-time algorithm to check whether a formula on 
+	$n$ variables comprising $m$ CNF clauses is renamable Horn.
+
+First, take each of the literals in the $i$th clause named as follows:
+\[
+C_i = L_{i,1} \vee L_{i,2} \vee \cdots \vee L_{i,len(C_i)}
+\]
+In a Horn clause, at most one literal in each clause can be unnegated.
+Now, simply note that in order to be renamable Horn, there must be some
+literals that can be swapped with their complements in order to make
+the problem HornSAT.
+
+The trick is we can form a 2-SAT problem\footnote{Idea to form a 2-SAT problem inspired by~\cite{322059}} where each variable represents
+a variable that could be negated:
+\[
+\bigwedge_{i=1}^m \bigwedge_{j \ne k \in C_i} L_{i,j} \vee L_{i,k}
+\]
+Here, if we find a satisfying assignment, then the original problem
+was renamable HornSAT, where every variable that was assigned True
+needs to be swapped. Clearly, this 2-SAT problem is polynomial in the size
+of the original problem (easily bounded by $O(m \times n^2)$), and since 2-SAT
+is linear time solvable, our entire algorithm is polynomial time.
+    \end{enumerate}
   \item DLL Algorithm and Exponential Search
 Claim: No matter which variable we branch on, the total number of branches
 will be exponential in $n$, the number of pigeons.
@@ -105,5 +149,7 @@ Chaff’s 2-literal watching:
 \end{proof}
 \end{enumerate}
 
+\bibliographystyle{plain}
+\bibliography{lickly_hw1}
 \end{document}
 
