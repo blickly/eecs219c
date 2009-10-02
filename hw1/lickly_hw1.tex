@@ -6,15 +6,38 @@
 \title{EECS 219C: HW \#1}
 \author{Ben Lickly}
 \date{September 30, 2009}
-\begin{document}
 
 \newcommand{\no}[1]{\overline{#1}}
 \newcommand{\lef}[1]{\overrightarrow{#1}}
 \newcommand{\ri}[1]{\overleftarrow{#1}}
 \newcommand{\po}[1]{\overbrace{#1}}
+
+\begin{document}
 \begin{enumerate}
   \item Renamable Horn-SAT
   \item DLL Algorithm and Exponential Search
+Claim: No matter which variable we branch on, the total number of branches
+will be exponential in $n$, the number of pidgeons.
+\begin{proof}
+Let $x_{ij}$ be an arbitrarily chosen variable corresponding to putting bird
+$i$ in hole $j$.
+We will claim that no matter which way this varibale is branched, the
+resulting problem will be at least as big as an $n-1$ sized version.
+Since the overall problem is unsatisfiable, both branches need to be explored.
+The solution to the recurrence $T(n) = 2\times T(n-1)$ is $O(2^n)$.
+
+Case 1: $x_{ij} = true$ \\
+In this case, we can discard from the first set of constraints
+the constraint that bird $i$ needs a hole.
+We can infer from the second set of constraints that no other bird
+can be fit in hole $j$.
+Thus, we are left with exactly the problem of fitting $n-1$ pigeons
+in $n-2$ holes, which is exactly the $n-1$ sized problem.
+
+Case 2: $x_{ij} = false$ \\
+Here, we use the intuition that %FIXME
+
+\end{proof}
   \item Experimenting with a SAT Solver
   \item Comparing head-tail pointers with 2-literal watching
     \begin{enumerate}
