@@ -2,11 +2,13 @@
 %      Author: Ben Lickly
 %     Created: Sun Oct 10 8:53 AM CEST
 %
-\documentclass{amsart}
+\documentclass{article}
 \title{EECS 219C: HW \#2}
 \author{Ben Lickly}
-\date{October 21, 2009}
+\date{October 25, 2009}
 
+\usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{algorithm2e}
 
 \newcommand{\no}[1]{\overline{#1}}
@@ -15,12 +17,92 @@
 \newcommand{\po}[1]{\overbrace{#1}}
 
 \begin{document}
+\maketitle
 \begin{enumerate}
   \item Modeling with SMT
+
+The given programs are equivalent.  The SMT solution is attached, named \texttt{lickly.smt}.
+
   \item Model generation
+
+The given program is attached, named \texttt{lickly\_hw2p2.py}.
+
   \item Small-domain Encoding for Linear Constraints
+    \begin{enumerate}
+      \item Given a conjunction of single-variable inequalities of the form given above, give a linear-time algorithm to decide the satisfiability of that formula. The time complexity should be linear in the number of variables (n) and inequalities (m).
+Also prove correctness of your algorithm.
+
+\if 0
+Let $x_i = -\inf$
+Iterate through all inequalities of the form $x_i \ge b$, and if
+$x_i < b$ set $x_i$ to $b$.
+When finished, check that all inequalities of the form $- x_i \ge b$ are satisfied.  If they aren't, the constraints are not satisfiable.
+\fi
+\begin{algorithm}
+  \For{$i \in \{0,n\}$ }{ $x_i \leftarrow -\infty$ \;}
+  \For{$``x_i \ge b" \in$ Inequalities}{
+  \If{$x_i < b$}{
+      $x_i \leftarrow b$ \;
+    }
+  }
+  \For{$``-x_i \ge b" \in$ Inequalities}{
+  \If{$-x_i < b$}{
+      return unsat \;
+    }
+  }
+  return sat \;
+
+\end{algorithm}
+
+First of all, notice that a set of inequalities of the form $x_i \ge b$ can never be unsatisfiable, since we can always increase each $x_i$ enough to make an unsatisfiable constraint satisfiable.  Second, notice that doing the increases in the order proposed here will actually give the least solution that satisfies all of the $x_i \ge b$ constraints.  If this least solution violates one of the $-x_i \ge b$ constraints, then all other solution to the $x_i \ge b$ constraints would also violate that constraint.  Thus, this algorithm rejects only the unsatisfiable constraints.
+
+\item Now suppose that you are given a Boolean combination of single-variable inequalities.
+
+  One simple approach is to iterate only through each singleton clause (i.e. without a $\vee$) and add those to the bounds for the variable they reference.  This approach is linear in the number of total clauses and constant in the length of each clause (since singleton and non-singleton clauses are both dealt with in constant time).
+    \end{enumerate}
   \item Generalized DPLL
+
+This paper presents an alternative approach to DPLL.  The most important feature is the way that information from the theory solver is encoded to direct the SAT problem, which is absent from normal DPLL solvers.
+It does this by searching through structures in the theory domain rather than boolean assignments of normal lazy SMT.
+It seems that there will be some domains in which defining an accurate heuristic may be as difficult as solving the original problem.  I am also worried that there may exist pathological cases where the heuristic directs the search in the wrong direction.
   \item Combining Theories
+
+    I ran out of time on this assignment, so I'll simply describe my approach:
+
+    For the first part of the problem, we can simply use the following algorithm, which potentially creates a quadratic number of new constraints:
+\begin{algorithm}
+  \For{$f \in $ uninterpreted functions}{
+    Declare bitvector for every occurrence of $f$ \;
+    \For{$f_i, f_j \in$ occurrences of $f$}{
+      Add constraint that $args(f_i) = args(f_j) \implies f_i = f_j$
+    }
+  }
+\end{algorithm}
+
+A smarter algorithm that did not need as many constraints would be formulated as follows:
+\begin{algorithm}
+  \For{$f_{i,c} \in $ occurrence $i$ of uninterpreted function $c$}{
+    Declare bitvector for $f_{i,c}$ \;
+  }
+  $done \leftarrow false$ \;
+  \While{$\neg done$}{
+    Run BV SMT solver on current problem \;
+    $done \leftarrow true$ \;
+    \For{$f_{i,c}, f_{j,c} \in$ pairs of occurrences of same function}{
+      \If{$args(f_i) = args(f_j)$ and $f_i \ne f_j$}{
+        Add constraint that $args(f_i) = args(f_j) \implies f_i = f_j$ \;
+        $done \leftarrow false$ \;
+      }
+    }
+  }
+\end{algorithm}
+\newpage
+
+This would run the BV SMT solver without any extra constraints, and only
+add constraints and rerun if the satisfying solution found violated some
+constraints of uninterpreted function theory.  If a satisfying solution that
+does not violate these constraints is found, or the problem is found to be
+unsatisfiable, then no further work is needed.
 \end{enumerate}
 
 %\bibliographystyle{plain}
