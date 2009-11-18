@@ -9,6 +9,7 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{algorithm2e}
+\usepackage{graphicx}
 
 \begin{document}
 \maketitle
@@ -24,7 +25,29 @@
   \end{enumerate}
 \item LTL, CTL, CTL$^*$
   \begin{enumerate}
-    \item %FIXME
+    \item This state machine does not satisfy the CTL formula because there exists an infinite path (namely the one that always stays in the leftmost blue state), for which there exists at every state a path that includes a state for which $p$ does not hold (namely the path that travels to the right).
+
+      Claim: Any system that satisfies the CTL formula also satisfies the LTL formula.
+\begin{proof}
+  Assume that we have a system $S$ that satisfies $AF AG p$.  Let $z$ be an arbitrary path in the infinite computation tree of $S$.  Since we know that $F AG p$ holds for all paths in $S$, it also must hold for $z$.  Now let us consider the future state in $z$, call it $sf$, for which $AG p$ holds.  We know that all paths originating from $sf$ have the property $G p$.  In particular, so does the path that coincides with $z$.  Thus the entire path $z$ satisfies $FG p$, with the future state being $sf$.
+\end{proof}
+\item
+$E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restriction.  For example, take the Kripke structure in Figure~\ref{fig:p2b1}. This system has the property that $EG(EF q)$ since the path that stays in state $a$ will always have a future path that contains $q$.  On the other hand, there is no path for which $q$ is always true in the future ($E(GF p)$).
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.5]{p2b1}
+  \end{center}
+  \label{fig:p2b1}
+\end{figure}
+
+  $E(GF p)$ is not equivalent to $EG(AF p)$ because the second is a stronger restriction. For example, take the Kripke structure in Figure~\ref{fig:p2b2}.  Here, there exists a path in which $q$ is always true in the future ($E(GF q)$), namely the path that switches between $a$ and $q$.  On the other hand, it is not true that $EG(AF q)$, since no matter what path we choose, there always will exist some branching path that stay forever in $a$.
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.5]{p2b2}
+  \end{center}
+  \label{fig:p2b2}
+\end{figure}
+
   \end{enumerate}
 \item Fixpoint Characterization of $AFp$
 \item Simulation and SAT
