@@ -37,6 +37,7 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
   \begin{center}
     \includegraphics[scale=0.5]{p2b1}
   \end{center}
+  \caption{Example distinguishing $E(GF p)$ from $EG(EF p)$}
   \label{fig:p2b1}
 \end{figure}
 
@@ -45,11 +46,24 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
   \begin{center}
     \includegraphics[scale=0.5]{p2b2}
   \end{center}
+  \caption{Example distinguishing $E(GF p)$ from $EG(AF p)$}
   \label{fig:p2b2}
 \end{figure}
-
+\item
+\begin{enumerate}
+  \item These two CTL formulas are equivalent. There exist a path that has one of two properties true in the future if and only if there exists a path that has one true or the other.
+  \item These are not equivalent.  A computation tree that distinguishes them is given in Figure~\ref{fig:p2c}.  Here it is not the case that either $AFp$ or $AFq$, but it is true that $AF(p \vee q)$.
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.5]{p2c}
+  \end{center}
+  \caption{Example distinguishing $(AF p) \vee (AF q)$ from $AF(p \vee q)$}
+  \label{fig:p2c}
+\end{figure}
+\end{enumerate}
   \end{enumerate}
 \item Fixpoint Characterization of $AFp$
+  %FIXME: Review Chapter 6 of the Clarke et al. book
 \item Simulation and SAT
   \begin{enumerate}
     \item How many boolean variables do we have?
