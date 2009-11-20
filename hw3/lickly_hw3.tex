@@ -69,6 +69,22 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
     \item How many boolean variables do we have?
       \[ |S| \times |S'| \]
     \item Suppose that two states $s$ and $s'$ have the same label. \dots
+
+      In general, the CNF clause will be of the form:
+      \[ \neg x_{s,t} \vee x_{s',t'_1} \vee \dots \vee x_{s',t'_k} \]
+
+      In the case where there are no successors of $s'$, this simplifies to:
+      \[ \neg x_{s,t} \]
+
+      Clearly, there can be no more of these clauses than there are boolean
+      variables. i.e. $|S| \times |S'|$
+    \item
+      \[ x_{s_0,t'_1} \vee \dots \vee x_{s',t'_k} \]
+      where $t'_k \in S'_0$
+    \item The overall problem is isomorphic to a Horn-SAT problem
+      (by simply negating all the boolean variables).  This means that there
+      is an efficient algorithm to solve it that runs in
+      % FIXME: run time of hornsat
   \end{enumerate}
 \item Symmetry Reduction
 \item SPINing Elevators
