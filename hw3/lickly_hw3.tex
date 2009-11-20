@@ -64,6 +64,25 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
   \end{enumerate}
 \item Fixpoint Characterization of $AFp$
   %FIXME: Review Chapter 6 of the Clarke et al. book
+
+  Prove that the set of states satisfying $AF p$ is the least fixpoint of the function $\tau$ given by $\tau(Z) = p \vee AX Z$.
+
+\begin{proof}
+  Claim 1:  $AF p$ is a fixpoint of $\tau$.
+
+  \[\tau(AF p) = p \vee AX(AF p) = p \vee X(AF p) = AF p \]
+  Thus $AF p$ is a fixpoint of $\tau$.
+
+  Claim 2: For any fixpoint of $\tau$ $S$, $AF p \supseteq S$.
+
+  Assume to the contrary that this were not the case.  This would mean that
+  there exists some computation $Z \in S$ such that $Z \not\in AF p$.
+  This would mean that there exists a path for which $p$ is not true,
+  or $EG \neg p$.  Now if we take $\tau(Z)$, we get $p \vee AX(EG \neg p)$,
+  which is clearly not equivalent.  Thus $S$ is not a fixed-point of $\tau$.
+  This contradicts our assumption.
+\end{proof}
+
 \item Simulation and SAT
   \begin{enumerate}
     \item How many boolean variables do we have?
@@ -87,11 +106,32 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
       % FIXME: run time of hornsat
   \end{enumerate}
 \item Symmetry Reduction
+
+  The Kripke structure in Figure~1 has two automorphisms, namely the identity
+  function, and $f$ given as follows:
+  \[
+  f(x) = \begin{cases}
+    s0 &\text{if } x = s1 \\
+    s1 &\text{if } x = s0 \\
+    s2 &\text{if } x = s3 \\
+    s3 &\text{if } x = s2
+  \end{cases}
+  \]
+  The orbits are $\left\{ s0, s1 \right\}$ and $\left\{ s2, s3 \right\}$.
 \item SPINing Elevators
   \begin{enumerate}
     \item The elevator never moves with its doors open.
-    \item Whenever a user at floor 1 requests the elevator and it is not at floor 1, then it eventually arrives at that floor and opens its doors.
+
+      \[ G elv!move(j) \implies \neg doors\_open \]
+    \item Whenever a user at floor 1 requests the elevator and it is not at
+      floor 1, then it eventually arrives at that floor and opens its doors.
     \item The elevator visits every floor infinitely often.
+      \[G \left( (F floor == 0) \wedge (F floor == 1)
+      \wedge (F floor == 2) \wedge (F floor == 3) \right) \]
+      Trying to verify this property produces a counterexample, where one
+      user simply exits and enters the elevator at floor 0
+      forever, with the elevator completely missing two floors
+      and only spending an infinite amount of time at one floor.
   \end{enumerate}
 \end{enumerate}
 
