@@ -9,6 +9,10 @@ chan ctl = [2] of { mtype, byte };
 show byte floor;		/* elevator position 0 to NF-1 */
 show bool doors_open=true;	/* status of elevator doors */
 
+/* Added by me (Ben Lickly) to test properties in problem 5 */
+show bool moving=false;		/* whether elevator is moving or not */
+show byte waiting[NP*NF];
+
 active proctype controller()
 {	byte j;
 	bool must_visit[NF];
@@ -27,7 +31,7 @@ active proctype controller()
 				elv!close,0;
 				(!doors_open);
 				j = (floor+j)%NF;
-				elv!move(j);
+				atomic{elv!move(j); moving=true;}
 				(floor == j);
 				elv!open,0;
 				(doors_open)
@@ -48,7 +52,7 @@ active proctype controller()
 active proctype elevator()
 {
 	do
-	:: elv?move(floor)
+	:: elv?move(floor) -> moving = false
 	:: elv?close,_ -> doors_open = false
 	:: elv?open,_  -> doors_open = true
 	od

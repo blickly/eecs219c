@@ -122,9 +122,11 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
   \begin{enumerate}
     \item The elevator never moves with its doors open.
 
-      \[ G elv!move(j) \implies \neg doors\_open \]
+      \[ G (moving \implies \neg doors\_open )\]
     \item Whenever a user at floor 1 requests the elevator and it is not at
       floor 1, then it eventually arrives at that floor and opens its doors.
+
+      \[ \forall p\in NP: G (waiting[1,p] \implies F \neg waiting[1,p] )\]
     \item The elevator visits every floor infinitely often.
       \[G \left( (F floor == 0) \wedge (F floor == 1)
       \wedge (F floor == 2) \wedge (F floor == 3) \right) \]
