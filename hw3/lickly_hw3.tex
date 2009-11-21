@@ -123,10 +123,25 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
     \item The elevator never moves with its doors open.
 
       \[ G (moving \implies \neg doors\_open )\]
+      This is valid, no matter how many passengers there are.
+
     \item Whenever a user at floor 1 requests the elevator and it is not at
       floor 1, then it eventually arrives at that floor and opens its doors.
 
-      \[ \forall p\in NP: G (waiting[1,p] \implies F \neg waiting[1,p] )\]
+      \[ G ( \wedge_{p \in NP} waiting_floor0[p] \implies F \neg waiting_floor0[p] )\]
+      This is true for one and two passengers, but is invalid for three.
+      The counterexample is shown in Figure~\ref{fig:waiting3}.
+      Here, because the channel for remembering button presses is only
+      two units long, the third passenger's call to the lift is effectively
+      forgotten.
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.6]{waiting3}
+  \end{center}
+  \caption{Example in which third passenger cannot catch lift}
+  \label{fig:waiting3}
+\end{figure}
+
     \item The elevator visits every floor infinitely often.
       \[G \left( (F floor == 0) \wedge (F floor == 1)
       \wedge (F floor == 2) \wedge (F floor == 3) \right) \]
@@ -134,6 +149,14 @@ $E(GF p)$ is not equivalent to $EG(EF p)$ because the first is a stronger restri
       user simply exits and enters the elevator at floor 0
       forever, with the elevator completely missing two floors
       and only spending an infinite amount of time at one floor.
+      This is the case no matter how few passengers there are.
+\begin{figure}
+  \begin{center}
+    \includegraphics[scale=0.6]{every_floor1}
+  \end{center}
+  \caption{Example in which all floors are not reached}
+  \label{fig:everyf}
+\end{figure}
   \end{enumerate}
 \end{enumerate}
 
