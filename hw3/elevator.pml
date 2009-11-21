@@ -6,12 +6,14 @@ mtype = { button, move, open, close };
 chan elv = [2] of { mtype, byte };
 chan ctl = [2] of { mtype, byte };
 
+/* No matter how few passengers there are, it is never the case that
+ * all floors will necessarily be visited infinitely often. */
 show byte floor;		/* elevator position 0 to NF-1 */
 show bool doors_open=true;	/* status of elevator doors */
 
-/* Added by me (Ben Lickly) to test properties in problem 5 */
+/* Global variables added by Ben Lickly to test properties in problem 5 */
 show bool moving=false;		/* whether elevator is moving or not */
-show byte waiting[NP*NF];
+show bool waiting[NP];
 
 active proctype controller()
 {	byte j;
@@ -52,6 +54,8 @@ active proctype controller()
 active proctype elevator()
 {
 	do
+	/* No matter how many passengers we have, the doors are
+	 * never open when moving. */
 	:: elv?move(floor) -> moving = false
 	:: elv?close,_ -> doors_open = false
 	:: elv?open,_  -> doors_open = true
@@ -69,8 +73,18 @@ active [NP] proctype passenger()
 	do
 	:: ctl!button(iam[_pid%NP]) ->	/* push call button */
 
+		if
+		:: iam[_pid%NP] == 0 -> waiting[_pid%NP] = true;
+		fi;
 		/* wait to enter elevator */
 W1:		(floor == iam[_pid%NP] && doors_open);
+		/* With two or fewer passengers, the call button is "fair,"
+		 * in that the elevator will come eventually. With three
+		 * passengers, however, this is no longer the case. */
+		if
+		:: iam[_pid%NP] == 0 -> waiting[_pid%NP] = false;
+		fi;
+		/* waiting[_pid%NP] = false; */
 		printf("MSC: %d enters at floor %d\n", _pid, iam[_pid%NP]);
 		j = 0;	/* choose a destination */
 		do
