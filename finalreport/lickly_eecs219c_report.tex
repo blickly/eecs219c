@@ -8,6 +8,7 @@
 
 \usepackage{amsmath}
 \usepackage[T1]{fontenc}
+\usepackage{graphicx}
 \usepackage{color}
 
 \begin{document}
@@ -46,7 +47,7 @@ This may point to a fundamental design flaw, but it may also simply mean that so
 For example, say we have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the realized component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
 
 \section{Background/Related Work}
-In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
+In~\cite{relationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
 
 Here, we aim to build a system for automatically checking the satisfiability of such interfaces and to aid in composing them.  We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling tool that contains supports hierarchical compositions of heterogeneous components.
 
@@ -66,6 +67,13 @@ $R(\phi_A) \subset R(\phi_B)$
 
 
 \subsection{Examples}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figs/Divide2} 
+\caption{An interface of a divider actor.}
+\label{fig:divider}
+\end{figure}
+
 \begin{itemize}
 	\item Valid composition with too abstract interfaces
 	\item Invalid composition
@@ -101,6 +109,20 @@ For the inverter, the user choses the contract
 x \ne 0
 \]
 to capture the restriction that we cannot divide by zero.  Since this contract does not specify the output value, it too is an abstraction that overapproximates.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figs/cascadeComp} 
+\caption{A composite actor formed by the cascade composition of two contained actors.}
+\label{fig:cascadeComp}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figs/feedbackComp} 
+\caption{A composite actor formed by adding feedback to its contained actor.}
+\label{fig:feedbackComp}
+\end{figure}
 
 In this case, if we run our tool, we can see that the resulting composition interface is not valid.  Intuitively, this is because there is no input to the first interface such that we can guarantee its output will not be zero.  Since these interfaces do not compose, we need to make them more concrete.
 
