@@ -28,15 +28,22 @@
 \section{Introduction/Motivation}
 Component-based design allows for more efficient construction of large systems, by starting with existing components that have known behaviors.  In order to prove properties of the overall system, it is often enough to combine properties of the individual components.
 
-Interface theories~\cite{interfaceTheories} specify how the components can be abstracted and how they can be composed.
+Interface theories~\cite{interfaceTheories} specify what properties components require of their environments, as well as how and when they can be abstracted, composed, or refined.
 \subsection{Motivation}
-Existing interface theories as are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
+Often, interface theories have their precise semantics captured only in the English text of the works in which they are published.
+Rather than reading these texts and performing the computations by hand, wee would like to automate these operations so that they can be checked (for some cases) by a computer.
+Since the problem is undecidable in general, we accept having a partial algorithm that may return "unknown."
 
 One key question is that of interface composition.  In component based verification, properties of the overall systems are proved by composing properties of the components, and the interface theories tell us how to make the compositions.
 
-One example of where this tool would be useful would be in an early stage in specifying systems. Different designers could specify abstractions of the behavior that they were willing to guarantee for the component that they were to build, much more quickly than they could even prototype a working implementation.  This tool, then, would be able to check that these components can be composed.  If it happens that this requirement cannot be met, then the design must be reconsidered.  It may require that the components will not work together, so simply that some of the designers must provide stronger guarantees of what their components will do.
+A typical example of where this type of tool would be useful would be in the early stages of system specification.
+Different designers could specify certain aspects of components to built that they would guarantee.
+This specification could be done much more quickly than building even a prototype component, but it would still be useful for specification.
+This tool would then be able to check that these components can be composed.
+If it happens that this requirement cannot be met, then the design must be reconsidered.
+This may point to a fundamental design flaw, but it may also simply mean that some designers must provide stronger guarantees of what their components will do.
 
-For example, one may have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
+For example, say we have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the realized component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
 
 \section{Background/Related Work}
 In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
