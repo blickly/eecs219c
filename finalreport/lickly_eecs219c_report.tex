@@ -50,7 +50,7 @@ Create a domain for Ptolemy II that \dots
 \subsection{Definitions}
 We define a deterministic interface to be one for which the outputs are uniquely determined by the inputs (and the current state, if stateful) for all valid inputs.  Even though most of our real components may behave deterministically, our interfaces may be abstractions of this behavior, and thus they are often not deterministic.  Informally, we can discuss one interface being more deterministic (or more abstract) than another.
 
-An interface $A=(X,Y,\phi_A)$ is \emph{more determinisitic} than interface $B=(X,Y,\phi_B)$, if
+An interface $A=(X,Y,\phi_A)$ is \emph{more deterministic} than interface $B=(X,Y,\phi_B)$, if
 \[
 \phi_B \implies \phi_A \wedge \phi_A \not\implies \phi_B
 \]
@@ -63,6 +63,7 @@ $R(\phi_A) \subset R(\phi_B)$
 	\item Valid composition with too abstract interfaces
 	\item Invalid composition
 \end{itemize}
+
 \section{Solution}
 RelationalInterface,
 InterfaceCheckerDirector,
@@ -81,7 +82,7 @@ In this example, interfaces are being used to prove safety properties of the sys
 \[
 y >= 0
 \]
-for the absolute value.  <!--If we consider this formula as a relation, it contains all pairs of inputs and outputs such that the input is not simultaneously zero with the output non-zero.-->  Clearly this is an overapproaximation of absolute value, since it doesn't take into account the input to the actor.
+for the absolute value.  <!--If we consider this formula as a relation, it contains all pairs of inputs and outputs such that the input is not simultaneously zero with the output non-zero.-->  Clearly this is an overapproximation of absolute value, since it doesn't take into account the input to the actor.
 For the inverter, the user choses the contract
 \[
 x \ne 0
@@ -127,7 +128,7 @@ Thus, the automated check would verify that the inferred interface refine the sp
 Interface theories specify formally what it means for one interface to refine another, like they do for composition, but informally, it simply means that the new interface can be used in place of the refined interface.
 
 There are many other possible, more long term extensions to this work, such as guessing and learning interfaces of atomic components by observing runtime behavior, or checking statically that the Java definition of an actor meets its interface.
-% Or \dots
+% Or more...
 
 
 \acks
