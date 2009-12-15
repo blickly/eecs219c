@@ -8,6 +8,7 @@
 
 \usepackage{amsmath}
 \usepackage[T1]{fontenc}
+\usepackage{color}
 
 \begin{document}
 
@@ -19,31 +20,30 @@
 
 \maketitle
 
+\newcommand{\fixme}[1]{\textcolor{red}{FIXME: #1}}
+
 \begin{abstract}
 \end{abstract}
 
 \section{Introduction/Motivation}
-Componenet-based design/verification
-
-One example of where this tool would be useful would be in an early stage in specifying systems. Different designers could specify abstractions of the behavior that they were willing to guarantee for the component that they were to build, much more quickly than they could even prototype a working implementation.  This tool, then, would be able to check that these components can be composed.  If it happens that this requirement cannot be met, then the design must be reconsidered.  It may require that the components will not work together, so simply that some of the designers must provide stronger guarantees of what their components will do.
-
-\section{Background/Related Work}
 Component-based design allows for more efficient construction of large systems, by starting with existing components that have known behaviors.  In order to prove properties of the overall system, it is often enough to combine properties of the individual components.
 
 Interface theories specify how the components can be abstracted and how they can be composed.
-In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
-
-Here, we aim to build a system for automatically checking the satisfiability of such interfaces and to aid in composing them.  We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling tool that contains supports hierarchical compositions of heterogeneous components.
-
-Motivation
+\subsection{Motivation}
 Existing interface theories, such as {} are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
 
 One key question is that of interface composition.  In component based verification, properties of the overall systems are proved by composing properties of the components, and the interface theories tell us how to make the compositions.
 
+One example of where this tool would be useful would be in an early stage in specifying systems. Different designers could specify abstractions of the behavior that they were willing to guarantee for the component that they were to build, much more quickly than they could even prototype a working implementation.  This tool, then, would be able to check that these components can be composed.  If it happens that this requirement cannot be met, then the design must be reconsidered.  It may require that the components will not work together, so simply that some of the designers must provide stronger guarantees of what their components will do.
+
 For example, one may have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
 
-\cite{realationalInterfaces}
-Check emails from Stavros
+\section{Background/Related Work}
+In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
+
+Here, we aim to build a system for automatically checking the satisfiability of such interfaces and to aid in composing them.  We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling tool that contains supports hierarchical compositions of heterogeneous components.
+
+\fixme{Check emails from Stavros}
 \section{Approach}
 Create a domain for Ptolemy II that \dots
 
@@ -98,12 +98,26 @@ P.S. Let's try an example with \[ a >= 0 \implies y = a\] or even \[a >= 0 \impl
 \subsection{Examples}
 
 \section{Conclusion}
-Future work includes extensions to add
-\begin{enumerate}
-	\item Refinement
-	\item Run-time monitoring
-	\item Interface guessing from runtime behavior
-\end{enumerate}
+Here, we have presented an infrastructure for verifying interfaces of components in Ptolemy~II, our actor based modeling tool.
+Our work currently checks for the validity of interfaces, and whether interfaces can be composed with each other.
+In addition, our work is the first to present a general infrastructure for interfaces in Ptolemy~II.
+
+As a general infrastructure, there are many possible extensions.
+One would be the addition of run-time checks to test that the values produced by the implementation conform to the interfaces.
+This could be a check of both the implementations and the interfaces.
+Interestingly, these checks could even have predictive power.
+For example, in the case of \\ref{fig:FIXME}, runtime checks could catch an error in the interface even in a run that
+did not exhibit an error. % If the inferred interface cannot be satisfied.
+
+Another possible addition would be to allow a model builder to specify the interface of a composite and check that that specification
+were valid.
+In this case, it would be acceptable for the user-specified interface to be more abstract than the inferred interface, since the model designer is free to abstract away details that he or she knows to be irrelevant.
+Thus, the automated check would verify that the inferred interface refine the specified interface.
+Interface theories specify formally what it means for one interface to refine another, like they do for composition, but informally, it simply means that the new interface can be used in place of the refined interface.
+
+There are many other possible, more long term extensions to this work, such as guessing and learning interfaces of atomic components by observing runtime behavior, or checking statically that the Java definition of an actor meets its interface.
+% Or \dots
+
 
 \acks
 
