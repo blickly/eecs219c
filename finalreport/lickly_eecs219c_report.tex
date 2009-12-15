@@ -28,15 +28,22 @@
 \section{Introduction/Motivation}
 Component-based design allows for more efficient construction of large systems, by starting with existing components that have known behaviors.  In order to prove properties of the overall system, it is often enough to combine properties of the individual components.
 
-Interface theories~\cite{interfaceTheories} specify how the components can be abstracted and how they can be composed.
+Interface theories~\cite{interfaceTheories} specify what properties components require of their environments, as well as how and when they can be abstracted, composed, or refined.
 \subsection{Motivation}
-Existing interface theories as are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
+Often, interface theories have their precise semantics captured only in the English text of the works in which they are published.
+Rather than reading these texts and performing the computations by hand, wee would like to automate these operations so that they can be checked (for some cases) by a computer.
+Since the problem is undecidable in general, we accept having a partial algorithm that may return "unknown."
 
 One key question is that of interface composition.  In component based verification, properties of the overall systems are proved by composing properties of the components, and the interface theories tell us how to make the compositions.
 
-One example of where this tool would be useful would be in an early stage in specifying systems. Different designers could specify abstractions of the behavior that they were willing to guarantee for the component that they were to build, much more quickly than they could even prototype a working implementation.  This tool, then, would be able to check that these components can be composed.  If it happens that this requirement cannot be met, then the design must be reconsidered.  It may require that the components will not work together, so simply that some of the designers must provide stronger guarantees of what their components will do.
+A typical example of where this type of tool would be useful would be in the early stages of system specification.
+Different designers could specify certain aspects of components to built that they would guarantee.
+This specification could be done much more quickly than building even a prototype component, but it would still be useful for specification.
+This tool would then be able to check that these components can be composed.
+If it happens that this requirement cannot be met, then the design must be reconsidered.
+This may point to a fundamental design flaw, but it may also simply mean that some designers must provide stronger guarantees of what their components will do.
 
-For example, one may have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
+For example, say we have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the realized component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
 
 \section{Background/Related Work}
 In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
@@ -65,12 +72,18 @@ $R(\phi_A) \subset R(\phi_B)$
 \end{itemize}
 
 \section{Solution}
-RelationalInterface,
-InterfaceCheckerDirector,
-etc.
+Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.
+We do this through the use of a new Ptolemy~II director, called the \texttt{InterfaceCheckerDirector}, which checks for the validity of interfaces in the actors of a model.
+We allow each actor in the model to be annotated with a parameter to specify its interface.
+Here we supporting both native Ptolemy~II expressions, which have a C-like syntax, and LISP-style string expressions in the Yices input language.
+The Ptolemy expressions must be boolean valued, with a true value meaning the interface is satisfied, and they are searched for by looking for parameters of actors named $\_interfaceExpr$.
+The Yices inputs language interfaces require string-valued parameters names $\_interfaceStr$, and allow richer expressions to be used.
+This is because the Yices input language supports quantifiers, which are absent in the Ptolemy expression language.
 
-\subsection{Sketch}
-Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.  We then allow each actor in the model to be annotated with a parameter to specify its interface.  We support either the built in Ptolemy expressions, which have a C-like syntax to express basic integral and boolean constraints, as well as strings in the Yices input language, which allow more complete specifications, including quantifiers, which are absent in the Ptolemy expression language.  In order to create an interface that is a Ptolemy expression, the user creates a parameter called \_interfaceExpr, and for a Yices input language string, they create a parameter called \_interfaceStr.
+The details of the interface theory itself are encapsulated in the \texttt{RelationalInterface} class, allowing for different interface theories to be added later, although currently only the relational interface theory of~\cite{relationalInterfaces} is supported.
+Interface theories themselves must handle cascade composition from one interface to another, parallel composition of two interfaces,
+and feedback composition.  In cases where these compositions are not possible, the interface theory must throw an exception.
+%FIXME: Make this true
 
 \subsection{Examples}
 Here are some examples of how to use the tool to check for model compatibility.
@@ -129,6 +142,10 @@ Interface theories specify formally what it means for one interface to refine an
 
 There are many other possible, more long term extensions to this work, such as guessing and learning interfaces of atomic components by observing runtime behavior, or checking statically that the Java definition of an actor meets its interface.
 % Or more...
+
+Finally, one of the most important uses of this tool is for developing new interface theories.
+Using this tool allows for rapid experiment with various interfaces, storage of examples in an executable form, and checking of hand proved results.
+In addition, the architecture encourages swapping out of one interface theory for another, which should make it easy to experiment with new theories altogether.
 
 
 \acks
