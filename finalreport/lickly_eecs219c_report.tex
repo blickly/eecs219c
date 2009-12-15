@@ -72,12 +72,18 @@ $R(\phi_A) \subset R(\phi_B)$
 \end{itemize}
 
 \section{Solution}
-RelationalInterface,
-InterfaceCheckerDirector,
-etc.
+Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.
+We do this through the use of a new Ptolemy~II director, called the \texttt{InterfaceCheckerDirector}, which checks for the validity of interfaces in the actors of a model.
+We allow each actor in the model to be annotated with a parameter to specify its interface.
+Here we supporting both native Ptolemy~II expressions, which have a C-like syntax, and LISP-style string expressions in the Yices input language.
+The Ptolemy expressions must be boolean valued, with a true value meaning the interface is satisfied, and they are searched for by looking for parameters of actors named $\_interfaceExpr$.
+The Yices inputs language interfaces require string-valued parameters names $\_interfaceStr$, and allow richer expressions to be used.
+This is because the Yices input language supports quantifiers, which are absent in the Ptolemy expression language.
 
-\subsection{Sketch}
-Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.  We then allow each actor in the model to be annotated with a parameter to specify its interface.  We support either the built in Ptolemy expressions, which have a C-like syntax to express basic integral and boolean constraints, as well as strings in the Yices input language, which allow more complete specifications, including quantifiers, which are absent in the Ptolemy expression language.  In order to create an interface that is a Ptolemy expression, the user creates a parameter called \_interfaceExpr, and for a Yices input language string, they create a parameter called \_interfaceStr.
+The details of the interface theory itself are encapsulated in the \texttt{RelationalInterface} class, allowing for different interface theories to be added later, although currently only the relational interface theory of~\cite{relationalInterfaces} is supported.
+Interface theories themselves must handle cascade composition from one interface to another, parallel composition of two interfaces,
+and feedback composition.  In cases where these compositions are not possible, the interface theory must throw an exception.
+%FIXME: Make this true
 
 \subsection{Examples}
 Here are some examples of how to use the tool to check for model compatibility.
@@ -136,6 +142,10 @@ Interface theories specify formally what it means for one interface to refine an
 
 There are many other possible, more long term extensions to this work, such as guessing and learning interfaces of atomic components by observing runtime behavior, or checking statically that the Java definition of an actor meets its interface.
 % Or more...
+
+Finally, one of the most important uses of this tool is for developing new interface theories.
+Using this tool allows for rapid experiment with various interfaces, storage of examples in an executable form, and checking of hand proved results.
+In addition, the architecture encourages swapping out of one interface theory for another, which should make it easy to experiment with new theories altogether.
 
 
 \acks
