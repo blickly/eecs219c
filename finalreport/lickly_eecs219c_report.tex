@@ -28,9 +28,9 @@
 \section{Introduction/Motivation}
 Component-based design allows for more efficient construction of large systems, by starting with existing components that have known behaviors.  In order to prove properties of the overall system, it is often enough to combine properties of the individual components.
 
-Interface theories specify how the components can be abstracted and how they can be composed.
+Interface theories~\cite{interfaceTheories} specify how the components can be abstracted and how they can be composed.
 \subsection{Motivation}
-Existing interface theories, such as {} are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
+Existing interface theories as are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
 
 One key question is that of interface composition.  In component based verification, properties of the overall systems are proved by composing properties of the components, and the interface theories tell us how to make the compositions.
 
@@ -71,11 +71,13 @@ etc.
 \subsection{Sketch}
 Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.  We then allow each actor in the model to be annotated with a parameter to specify its interface.  We support either the built in Ptolemy expressions, which have a C-like syntax to express basic integral and boolean constraints, as well as strings in the Yices input language, which allow more complete specifications, including quantifiers, which are absent in the Ptolemy expression language.  In order to create an interface that is a Ptolemy expression, the user creates a parameter called \_interfaceExpr, and for a Yices input language string, they create a parameter called \_interfaceStr.
 
+\subsection{Examples}
 Here are some examples of how to use the tool to check for model compatibility.
 
 In the first example, the user wants to compose two components.  In order to do that, he must first check that the interfaces are composable.  The first component takes an absolute value, and the second component takes the inverse of its input.
 
-In this example, interfaces are being used to prove safety properties of the system, so any abstractions must be overapproximations.  In the first attempt, the user choses the contract 
+\subsubsection{Interface Error}
+In this example, interfaces are being used to prove safety properties of the system, so any abstractions must be overapproximations.  In the first attempt, the user choses the contract
 \[
 y >= 0
 \]
@@ -95,7 +97,16 @@ a != 0 \implies y > 0
 \]
 P.S. Let's try an example with \[ a >= 0 \implies y = a\] or even \[a >= 0 \implies y = a  \wedge a < 0 \implies y = -a\]
 
-\subsection{Examples}
+\subsubsection{Component Error} \label{sec:componentError}
+Consider another example in which the first component produces a random value in the range $[2^{-31}, 2^{31}-1]$, and the second component is the same as before.
+The most deterministic valid constraint that the user can use for the first component would be
+\[
+y \ge 2^{-31} \wedge y \le 2^{31}-1
+\]
+
+In this case, running our tool will tell us that these components cannot be composed.
+This time, however, this is not caused by the interfaces being too abstract; in fact, they are maximally deterministic.
+The reason why we cannot compose these interfaces is that these components cannot be safely composed.
 
 \section{Conclusion}
 Here, we have presented an infrastructure for verifying interfaces of components in Ptolemy~II, our actor based modeling tool.
@@ -106,8 +117,8 @@ As a general infrastructure, there are many possible extensions.
 One would be the addition of run-time checks to test that the values produced by the implementation conform to the interfaces.
 This could be a check of both the implementations and the interfaces.
 Interestingly, these checks could even have predictive power.
-For example, in the case of \\ref{fig:FIXME}, runtime checks could catch an error in the interface even in a run that
-did not exhibit an error. % If the inferred interface cannot be satisfied.
+For example, take the example from Section~\ref{sec:componentError} with the first component changed so that it adds the random jitter to its input, rather than produce a random number by itself.
+Then any run using a value within the jitter of zero would be flagged as incompatible, even if that particular run caused no error in any component.
 
 Another possible addition would be to allow a model builder to specify the interface of a composite and check that that specification
 were valid.
