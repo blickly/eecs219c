@@ -1,4 +1,4 @@
-\documentclass[preprint,11pt]{sigplanconf}
+\documentclass[preprint,11pt,authoryear]{sigplanconf}
 
 % The following \documentclass options may be useful:
 %
@@ -23,11 +23,41 @@
 \end{abstract}
 
 \section{Introduction/Motivation}
-Compoenet-based design/verification
-\section{Background}
+Componenet-based design/verification
+
+One example of where this tool would be useful would be in an early stage in specifying systems. Different designers could specify abstractions of the behavior that they were willing to guarantee for the component that they were to build, much more quickly than they could even prototype a working implementation.  This tool, then, would be able to check that these components can be composed.  If it happens that this requirement cannot be met, then the design must be reconsidered.  It may require that the components will not work together, so simply that some of the designers must provide stronger guarantees of what their components will do.
+
+\section{Background/Related Work}
+Component-based design allows for more efficient construction of large systems, by starting with existing components that have known behaviors.  In order to prove properties of the overall system, it is often enough to combine properties of the individual components.
+
+Interface theories specify how the components can be abstracted and how they can be composed.
+In~\cite{realationalInterfaces}, Tripakis et. al. propose a relational type of interface that can capture interactions between inputs and outputs.  This allows more complex behaviors to be captured, but it also means that working with the interface theory can be more difficult.
+
+Here, we aim to build a system for automatically checking the satisfiability of such interfaces and to aid in composing them.  We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling tool that contains supports hierarchical compositions of heterogeneous components.
+
+Motivation
+Existing interface theories, such as {} are often captured only in the works in which they are published.  We would like to automate these operations so that they can be checked (for some cases) by a computer.  The problem is undecidable in general, so we accept having a partial algorithm that may return "unknown."
+
+One key question is that of interface composition.  In component based verification, properties of the overall systems are proved by composing properties of the components, and the interface theories tell us how to make the compositions.
+
+For example, one may have two components, as well as some abstractions that make up their interfaces, and be interested in the composition of those two interfaces.  One problem that might occur in this scenario is as follows: if the interfaces of the original components are too abstract, then the interfaces may not be composable.  In this case, the developer may need to come up with a more concrete interface, whose behavior is closer to the behavior of the component.  It would also be nice if we could algorithmically check whether interfaces were composable, making this process faster and less error-prone.
+
 \cite{realationalInterfaces}
-\section{Problem Definition}
+Check emails from Stavros
+\section{Approach}
 Create a domain for Ptolemy II that \dots
+
+\subsection{Definitions}
+We define a deterministic interface to be one for which the outputs are uniquely determined by the inputs (and the current state, if stateful) for all valid inputs.  Even though most of our real components may behave deterministically, our interfaces may be abstractions of this behavior, and thus they are often not deterministic.  Informally, we can discuss one interface being more deterministic (or more abstract) than another.
+
+An interface $A=(X,Y,\phi_A)$ is \emph{more determinisitic} than interface $B=(X,Y,\phi_B)$, if
+\[
+\phi_B \implies \phi_A \wedge \phi_A \not\implies \phi_B
+\]
+If we view the contract as simply specifying a relation between the inputs and the outputs, $R(\phi) \subseteq X \times Y$, then A being more deterministic than B simply means that
+$R(\phi_A) \subset R(\phi_B)$
+
+
 \subsection{Examples}
 \begin{itemize}
 	\item Valid composition with too abstract interfaces
@@ -37,8 +67,35 @@ Create a domain for Ptolemy II that \dots
 RelationalInterface,
 InterfaceCheckerDirector,
 etc.
-\section{Related Work}
-Check emails from Stavros
+
+\subsection{Sketch}
+Here, we add an interface to the Yices\cite{yices} SMT solver to the Ptolemy II\cite{ptII} project.  We then allow each actor in the model to be annotated with a parameter to specify its interface.  We support either the built in Ptolemy expressions, which have a C-like syntax to express basic integral and boolean constraints, as well as strings in the Yices input language, which allow more complete specifications, including quantifiers, which are absent in the Ptolemy expression language.  In order to create an interface that is a Ptolemy expression, the user creates a parameter called \_interfaceExpr, and for a Yices input language string, they create a parameter called \_interfaceStr.
+
+Here are some examples of how to use the tool to check for model compatibility.
+
+In the first example, the user wants to compose two components.  In order to do that, he must first check that the interfaces are composable.  The first component takes an absolute value, and the second component takes the inverse of its input.
+
+In this example, interfaces are being used to prove safety properties of the system, so any abstractions must be overapproximations.  In the first attempt, the user choses the contract 
+\[
+y >= 0
+\]
+for the absolute value.  <!--If we consider this formula as a relation, it contains all pairs of inputs and outputs such that the input is not simultaneously zero with the output non-zero.-->  Clearly this is an overapproaximation of absolute value, since it doesn't take into account the input to the actor.
+For the inverter, the user choses the contract
+\[
+x \ne 0
+\]
+to capture the restriction that we cannot divide by zero.  Since this contract does not specify the output value, it too is an abstraction that overapproximates.
+
+In this case, if we run our tool, we can see that the resulting composition interface is not valid.  Intuitively, this is because there is no input to the first interface such that we can guarantee its output will not be zero.  Since these interfaces do not compose, we need to make them more concrete.
+
+A second attempt at defining the component interfaces for this same model is given in Figure%~\ref{}. %FIXME
+Here, the interface of the inverter is unchanged, but the interface for the absolute value is changed to
+\[
+a != 0 \implies y > 0
+\]
+P.S. Let's try an example with \[ a >= 0 \implies y = a\] or even \[a >= 0 \implies y = a  \wedge a < 0 \implies y = -a\]
+
+\subsection{Examples}
 
 \section{Conclusion}
 Future work includes extensions to add
