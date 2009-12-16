@@ -1,9 +1,7 @@
 \documentclass[preprint,11pt]{sigplanconf}
 
-% The following \documentclass options may be useful:  10pt          To set in
-% 10-point type instead of 9-point. 11pt          To set in 11-point type instead
-% of 9-point. authoryear    To obtain author/year citation style instead of
-% numeric.
+% The following \documentclass options may be useful:
+% authoryear    To obtain author/year citation style instead of numeric.
 
 \usepackage{amsmath}
 \usepackage[T1]{fontenc}
@@ -25,14 +23,17 @@
 \end{abstract}
 
 \section{Introduction/Motivation}
-Component-based design allows large systems to be built more efficiently, by
-starting from a set of existing components that have known behaviors. This
-often allows proving properties of the overall system by combining properties
-of the individual components.
+Component-based design allows large systems to be built more efficiently,
+enforcing modularity that promotes reuse of existing components with
+know behaviors, and allows diverse groups of developers create components
+individually and be composed into a final system. 
 
 Interface theories~\cite{interfaceTheories} specify what properties components
 require of their environments, as well as how and when they can be abstracted,
 composed, or refined.
+This often allows proving
+properties of the overall system by combining properties of the individual
+components.
 
 \subsection{Motivation}
 Often, interface theories have their precise semantics captured only in the
@@ -78,11 +79,37 @@ of such interfaces and to aid in composing them.
 We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling
 tool that contains supports hierarchical compositions of heterogeneous components.
 
+In addition, there are a variety of tools that attempt to combine static analysis
+with concrete executions.
+%
+Larson and Austin propose an approach~\cite{larsonAustin:2003:coverageDetection} 
+to checking security properties of programs that are input determined.  They do
+this by abstracting the values of inputs and checking the desired properties on
+these abstractions. This gives them predictive power by allowing concrete error
+cases to flag error conditions that are produced by different input values on the
+same execution path.
+
+Gulavani et. al present a tool called Synergy~\cite{gulavani:synergy}, that
+also combines testing with static analysis.  Synergy tries to prove program
+properties by alternating between automated model checking of an abstraction of
+the program with refinement of the abstractions based on test cases of
+counterexamples.  The tool terminates if it is either able to prove the property
+on an abstraction of the program, or it finds a concrete counterexample to the
+program property.
+
 \fixme{Check emails from Stavros}
 
-This work also builds on other approaches that combine static analyses with
-runtime checking, such as concolic testing, \dots
-\fixme{Add references from CS265 class}.
+\section{Problem Definition}
+We see our current problem, and the resulting solution, as affecting two
+parties:
+1. model designers, who would like to verify properties of their models;
+and
+2. theory designers, who would like to develop new interface theories.
+%
+Any solution must keep both parties in mind, making sure that properties
+can be specified intuitively and necessary features for property proving are
+provided, as well as abstracting out details of the individual interface theory
+so that it can be changed later.
 
 \section{Approach}
 Create a domain for Ptolemy II that \dots
@@ -91,9 +118,9 @@ Create a domain for Ptolemy II that \dots
 We define a deterministic interface to be one for which the outputs are
 uniquely determined by the inputs (and the current state, if stateful) for all
 valid inputs.
-Even though most of our real components may behave deterministically, our
-interfaces may be abstractions of this behavior, and thus they are often not
-deterministic.
+Even though most of our real components behave deterministically, our
+interfaces are in general abstractions of this behavior, and thus they are
+often not deterministic.
 Informally, we can discuss one interface being more deterministic (or more
 abstract) than another.
 
@@ -107,17 +134,45 @@ the outputs, $R(\phi) \subseteq X \times Y$, then A being more deterministic
 than B simply means that $R(\phi_A) \subset R(\phi_B)$
 
 \subsection{Examples}
+Let us consider a component that performs a division operation.  In order to
+function, it requires that its environment not provide a zero-valued input as
+its denominator, as that would be a divide-by-zero opertaion. In traditional
+interface theories, where interface of a component is specified by separate
+input assumptions and output guarantees, the only piece of information about
+the behavior of a component is its input assumption, namely that the
+denominator input must be non-zero. In Ptolemy, we might annotate these
+restrictions as shown in Figure~\ref{fig:dividerOld}.
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\columnwidth]{figs/Divide2} 
-\caption{An interface of a divider actor.}
-\label{fig:divider}
+\includegraphics[scale=0.6]{figs/Divide2} % FIXME: Make old interface
+\caption{A non-realtional interface of a divider actor.}
+\label{fig:dividerOld}
 \end{figure}
 
-\begin{itemize}
-	\item Valid composition with too abstract interfaces
-	\item Invalid composition
-\end{itemize}
+In a relational interface theory, however, we can express interfaces that are
+more deterministic than this.  In fact, since this is a completely
+deterministic component, whose behavior is uniquely determined by its (valid)
+inputs, we can specify a completely deterministic interface.  We have shown how
+this may look in Ptolemy in Figure~\ref{fig:dividerNew}, but it simply says
+that the denominator must be non-zero, and the output is the quotient of the
+numerator and the denominator.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.6]{figs/Divide2} 
+\caption{A relational interface of a divider actor.}
+\label{fig:dividerNew}
+\end{figure}
+
+Notice that if we want to recover the input assumptions, we can simply project
+the contract onto the input variables by quantifying out the outputs.
+In this case, the input assumptions are 
+\[
+\exists z : y \ne 0 \wedge z = x / y 
+\]
+This is equivalent to simply $y \ne 0$, which was exactly the input assumption
+that we had previously.
 
 \section{Solution}
 Since there is ongoing research on creating industrial-grade SMT solvers,
@@ -167,7 +222,7 @@ In this example, interfaces are being used to prove safety properties of the
 system, so any abstractions must be overapproximations.
 In the first attempt, the user choses the contract
 \[
-y >= 0
+y \ge 0
 \]
 for the absolute value.
 <!--If we consider this formula as a relation,
@@ -214,10 +269,11 @@ Since these interfaces do not compose, we need to make them more concrete.
 A second attempt at defining the component interfaces for this same model is
 given in Figure~\ref{fig:absoluteError}.
 Here, the interface of the inverter is unchanged,
-but the interface for the absolute value is changed to \[
-a != 0 \implies y > 0
+but the interface for the absolute value is changed to
+\[
+a \ne 0 \implies y > 0
 \]
-P.S. Let's try an example with \[ a >= 0 \implies y = a\] or even \[a >= 0
+P.S. Let's try an example with \[ a \ge 0 \implies y = a\] or even \[a \ge 0
 \implies y = a  \wedge a < 0 \implies y = -a\]
 
 \subsubsection{Component Error} \label{sec:componentError}
@@ -286,24 +342,26 @@ means that the new interface can be used in place of the refined interface.
 
 \section{Conclusion}
 Here, we have presented an infrastructure for verifying interfaces of
-components in Ptolemy~II, our actor based modeling tool. Our work currently
-checks for the validity of interfaces, and whether interfaces can be composed
-with each other. In addition, our work is the first to present a general
-infrastructure for interfaces in Ptolemy~II.
+components in Ptolemy~II, our actor based modeling tool. Our work
+allows users to annotate Ptolemy II models with interface specifications in a
+variety of formats, without changing the execution semantics of the model.
+We also support automatically checking the validity of interface, as well as the
+compatibility of interfaces for composition, and work on checking refienment
+and run-time conformance is in progress. In addition, our work is the first to
+present a general infrastructure for interfaces in Ptolemy~II.
 
-
-There are many other possible, more long term extensions to this work, such as
+There are many possible, more long term extensions to this work, such as
 guessing and learning interfaces of atomic components by observing runtime
 behavior, or checking statically that the Java definition of an actor meets
 its interface.
-% Or more...
+% FIXME: Or more...
 
 Finally, one of the most important uses of this tool is for developing new
 interface theories. Using this tool allows for rapid experiment with various
 interfaces, storage of examples in an executable form, and checking of hand
 proved results. In addition, the architecture encourages swapping out of one
-interface theory for another, which should make it easy to experiment with new
-theories altogether.
+interface theory for another, which intends to make it easy to experiment with
+new theories altogether.
 
 \acks
 
