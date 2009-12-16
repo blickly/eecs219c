@@ -21,7 +21,7 @@
 
 \maketitle
 
-\newcommand{\fixme}[1]{\textcolor{red}{FIXME: #1}}
+\newcommand{\fixme}[1]{\textcolor{red}{(FIXME: #1)}}
 
 \begin{abstract}
 \end{abstract}
@@ -52,6 +52,10 @@ In~\cite{relationalInterfaces}, Tripakis et. al. propose a relational type of in
 Here, we aim to build a system for automatically checking the satisfiability of such interfaces and to aid in composing them.  We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling tool that contains supports hierarchical compositions of heterogeneous components.
 
 \fixme{Check emails from Stavros}
+
+This work also builds on other approaches that combine static analyses with runtime checking, such as
+concolic testing, \dots \fixme{Add references from CS265 class}.
+
 \section{Approach}
 Create a domain for Ptolemy II that \dots
 
@@ -165,16 +169,27 @@ In this case, running our tool will tell us that these components cannot be comp
 This time, however, this is not caused by the interfaces being too abstract; in fact, they are maximally deterministic.
 The reason why we cannot compose these interfaces is that these components cannot be safely composed.
 
-\section{Conclusion}
-Here, we have presented an infrastructure for verifying interfaces of components in Ptolemy~II, our actor based modeling tool.
-Our work currently checks for the validity of interfaces, and whether interfaces can be composed with each other.
-In addition, our work is the first to present a general infrastructure for interfaces in Ptolemy~II.
-
+\section{Ongoing work}
 As a general infrastructure, there are many possible extensions.
 One would be the addition of run-time checks to test that the values produced by the implementation conform to the interfaces.
 This could be a check of both the implementations and the interfaces.
 Interestingly, these checks could even have predictive power.
-For example, take the example from Section~\ref{sec:componentError} with the first component changed so that it adds the random jitter to its input, rather than produce a random number by itself.
+As an example, consider Figure~\ref{fig:randomJitter}.
+Here, the first component adds a value to its input that is randomly chosen from the range $[-100,100)$.
+Since there is non-determinism in the component, the given interface, $x-100 \le y < x+100$, is as deterministic as possible.
+Unlike the totally random component from Figure~\ref{fig:randomError}, these components can be validly composed by restricting the acceptable inputs $x$ that can be provided to the composite.
+In isolation, static analysis on this component will declare it to be error-free.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]%{figs/randomJitter}
+{figs/Randomizer} %FIXME: Add random jitter screenshot
+\caption{A component with an error that may not show up through testing.}
+\label{fig:randomJitter}
+\end{figure}
+Imagine that we had test cases that ran this code with an input of $42$.
+This would be an erroneous composition, since running the model could cause the first component to output $0$, resulting in a divide by zero error.
+Through standard testing, however, the odds of finding this error by running the model would be very small ($0.5\%$, in this example).
+If we used run-time checks of our interfaces, however, then we could detect unsafe uses through testing, and always flag a test case with an input of $42$ as violating the input requirements of the composite interface.
 Then any run using a value within the jitter of zero would be flagged as incompatible, even if that particular run caused no error in any component.
 
 Another possible addition would be to allow a model builder to specify the interface of a composite and check that that specification
@@ -182,6 +197,12 @@ were valid.
 In this case, it would be acceptable for the user-specified interface to be more abstract than the inferred interface, since the model designer is free to abstract away details that he or she knows to be irrelevant.
 Thus, the automated check would verify that the inferred interface refine the specified interface.
 Interface theories specify formally what it means for one interface to refine another, like they do for composition, but informally, it simply means that the new interface can be used in place of the refined interface.
+
+\section{Conclusion}
+Here, we have presented an infrastructure for verifying interfaces of components in Ptolemy~II, our actor based modeling tool.
+Our work currently checks for the validity of interfaces, and whether interfaces can be composed with each other.
+In addition, our work is the first to present a general infrastructure for interfaces in Ptolemy~II.
+
 
 There are many other possible, more long term extensions to this work, such as guessing and learning interfaces of atomic components by observing runtime behavior, or checking statically that the Java definition of an actor meets its interface.
 % Or more...
