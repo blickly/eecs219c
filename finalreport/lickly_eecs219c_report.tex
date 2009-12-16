@@ -97,7 +97,7 @@ counterexamples.  The tool terminates if it is either able to prove the property
 on an abstraction of the program, or it finds a concrete counterexample to the
 program property.
 
-\fixme{Check emails from Stavros}
+\fixme{Check emails from Stavros} %FIXME
 
 \section{Problem Definition}
 We see our current problem, and the resulting solution, as affecting two
@@ -174,70 +174,8 @@ In this case, the input assumptions are
 This is equivalent to simply $y \ne 0$, which was exactly the input assumption
 that we had previously.
 
-\section{Solution}
-Since there is ongoing research on creating industrial-grade SMT solvers,
-we elect to integrate an existing solver rather than create one from scratch.
-Our approach leverages the Yices\cite{yices} SMT solver, interfacing it to
-work in the Ptolemy II\cite{ptII} modeling framework.
-
-We do this through the use of a new Ptolemy~II director, called the
-\texttt{InterfaceCheckerDirector}, which checks for the validity of interfaces
-in the actors of a model. We allow each actor in the model to be annotated with
-a parameter to specify its interface. Here we supporting both native Ptolemy~II
-expressions, which have a C-like syntax, and LISP-style string expressions in
-the Yices input language. The Ptolemy expressions must be boolean valued, with
-a true value meaning the interface is satisfied, and they are searched for by
-looking for parameters of actors named $\_interfaceExpr$. The Yices inputs
-language interfaces require string-valued parameters names $\_interfaceStr$,
-and allow richer expressions to be used. This is because the Yices input
-language supports quantifiers, which are absent in the Ptolemy expression
-language.
-
-The details of the interface theory itself are encapsulated in the
-\texttt{RelationalInterface} class, allowing for different interface theories
-to be added later, although currently only the relational interface theory
-of~\cite{relationalInterfaces} is supported. Interface theories themselves must
-handle cascade composition from one interface to another, parallel composition
-of two interfaces, and feedback composition. In cases where these compositions
-are not possible, the interface theory must throw an exception.
-%FIXME: Make this true
-
-\subsection{Examples}
-Here are some examples of how to use the tool to check for model compatibility.
-
-In the first example, the user wants to compose two components.
-In order to do that, he must first check that the interfaces are composable. 
-The first component takes an absolute value, and the second component takes the
-inverse of its input.
-
-\subsubsection{Interface Error}
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\columnwidth]{figs/absoluteError}
-\caption{An error in interface specification.}
-\label{fig:absoluteError}
-\end{figure}
-
-In this example, interfaces are being used to prove safety properties of the
-system, so any abstractions must be overapproximations.
-In the first attempt, the user choses the contract
-\[
-y \ge 0
-\]
-for the absolute value.
-<!--If we consider this formula as a relation,
-it contains all pairs of inputs and outputs such that
-the input is not simultaneously zero with the output non-zero.-->
-Clearly this is an overapproximation of absolute value, since it doesn't take
-into account the input to the actor. For the inverter, the user choses the
-contract
-\[
-x \ne 0
-\]
-to capture the restriction that we cannot divide by zero.
-Since this contract does not specify the output value, it too is an abstraction
-that overapproximates.
-
+% FIXME:  Add explainations of what cascade composition and feedback
+% composition mean in terms of theory:
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{figs/cascadeComp} 
@@ -247,17 +185,83 @@ actors.}
 \end{figure}
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[width=\columnwidth]{figs/feedbackComp} 
+\centering % FIXME: Edit this graphic to move director to side
+\includegraphics[width=\columnwidth]{figs/feedbackComp}
 \caption{A composite actor formed by adding feedback to its contained actor.}
 \label{fig:feedbackComp}
 \end{figure}
 
-In this case, if we run our tool, we can see that the resulting composition
-interface is not valid.
-Intuitively, this is because there is no input to the first interface such
-that we can guarantee its output will not be zero.
-Since these interfaces do not compose, we need to make them more concrete.
+\section{Solution}
+Since there is ongoing research on creating industrial-grade SMT solvers,
+we elect to integrate an existing solver rather than create one from scratch.
+Our approach leverages the Yices\cite{yices} SMT solver, interfacing it to
+work in the Ptolemy II\cite{ptII} modeling framework.
+
+We create a new Ptolemy~II director, called the
+\texttt{InterfaceCheckerDirector}, which checks the validity of the interfaces of
+the actors in a model. We allow each actor in the model to be annotated with a
+parameter to specify its interface. Here we supporting both native Ptolemy~II
+expressions, which have a C-like syntax, and LISP-style string expressions in the
+Yices input language. The Ptolemy expressions must be boolean valued, with a true
+value meaning the interface is satisfied, and they are searched for by looking
+for parameters of actors named $\_interfaceExpr$. The Yices inputs language
+interfaces require string-valued parameters names $\_interfaceStr$, and allow
+richer expressions to be used. This is because the Yices input language supports
+quantifiers, which are absent in the Ptolemy expression language.
+
+The details of the interface theory itself are encapsulated in the
+\texttt{RelationalInterface} class, allowing for different interface theories
+to be added later, although currently only the relational interface theory
+of~\cite{relationalInterfaces} is supported. Interface theories themselves must
+handle cascade composition from one interface to another, parallel composition
+of two interfaces, and feedback composition. In cases where these compositions
+are not possible, the interface theory must throw an exception.
+
+\subsection{Usage Examples}
+This section chronicles possible use cases of the new interface analysis from a
+user's point of view.
+%FIXME: Make me flow better!
+
+In the first example, a user wants to compose two components, the first of
+which takes the absolute value of its input, and the second of which takes the
+inverse of its input. In order to guarantee that the components have a valid
+composition, the user must first check that the interfaces are composable.
+In this example, the components themselves can be connected sucessfully, as
+long as we restrict the inputs to the composition to be non-zero.  We will see,
+however, that what we can prove depends on choosing the right abstractions.
+Since interfaces are used to prove safety properties of the system, any
+abstractions must be overapproximations.
+
+\subsubsection{Interface Error}
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{figs/absoluteError}
+\caption{An error in interface specification.}
+\label{fig:absoluteError}
+\end{figure}
+
+In the first attempt at choosing interface abstractions, shown in
+Figure~\ref{fig:absoluteError}, the user choses the contract
+\[
+y \ge 0
+\]
+for the absolute value.  This only guarantees that the output will be
+non-negative, regardless of the input. This is an overapproximation of
+absolute value, since it doesn't take into account the input to the actor.
+%
+For the inverter, the user choses the contract
+\[
+x \ne 0
+\]
+to capture the restriction that we cannot divide by zero.
+Since this contract does not specify the output value, it too is an abstraction
+that overapproximates.
+
+In this case, when we check our interfaces our tool will tell us that the
+resulting composition interface has an unsatisfiable contract, showing that the
+interface is not valid. Intuitively, this is because there is no input to the
+first component's interface such that we can guarantee its output will not be
+zero. Since these interfaces do not compose, we need to make them more concrete.
 
 \begin{figure}[htbp]
 \centering
@@ -267,14 +271,21 @@ Since these interfaces do not compose, we need to make them more concrete.
 \end{figure}
 
 A second attempt at defining the component interfaces for this same model is
-given in Figure~\ref{fig:absoluteError}.
+given in Figure~\ref{fig:absoluteCorrected}.
 Here, the interface of the inverter is unchanged,
-but the interface for the absolute value is changed to
+but the interface for the absolute value is made more deterministic, changing
+its contract to
 \[
-a \ne 0 \implies y > 0
+x \ne 0 \implies y > 0 .
 \]
-P.S. Let's try an example with \[ a \ge 0 \implies y = a\] or even \[a \ge 0
-\implies y = a  \wedge a < 0 \implies y = -a\]
+% P.S. Let's try an example with \[ x \ge 0 \implies y = x\] or even 
+% \[ x \ge 0 \implies y = x \wedge x < 0 \implies y = -x\]
+This interface is still an abtraction, it does not specify exactly what
+the result of any input is, or even mention what the absolute value of zero is.
+All it says is that the absolute values of non-zero inputs are positive.
+This is concrete enough, however, to define the interface of the composite.  In
+particular, we can guarantee that given a non-zero value to the composite, we
+will avoid an error within the component, which is exactly correct.
 
 \subsubsection{Component Error} \label{sec:componentError}
 \begin{figure}[htbp]
@@ -285,12 +296,12 @@ P.S. Let's try an example with \[ a \ge 0 \implies y = a\] or even \[a \ge 0
 \end{figure}
 
 Consider another example in which the first component produces a random value
-in the range $[2^{-31}, 2^{31}-1]$, and the second component is the same as
+in the range $[-100, 100)$, and the second component is the same as
 before.
 The most deterministic valid constraint that the user can use for the first
 component would be
 \[
-y \ge 2^{-31} \wedge y \le 2^{31}-1
+y \ge -100 \wedge y < 100
 \]
 
 In this case, running our tool will tell us that these components cannot be
@@ -299,6 +310,10 @@ This time, however, this is not caused by the interfaces being too abstract;
 in fact, they are maximally deterministic.
 The reason why we cannot compose these interfaces is that these components
 cannot be safely composed.
+Even though testing may not produce the error in a given run, there is always
+the possibility that this first component will produce a zero-valued output. 
+Since we are not allowed to look inside or change the components we are given,
+the only response our tool can give is to disallow such composition.
 
 \section{Ongoing work}
 As a general infrastructure, there are many possible extensions.
@@ -308,8 +323,8 @@ the implementations and the interfaces. Interestingly, these checks could even
 have predictive power. As an example, consider Figure~\ref{fig:randomJitter}.
 Here, the first component adds a value to its input that is randomly chosen
 from the range $[-100,100)$. Since there is non-determinism in the component,
-the given interface, $x-100 \le y < x+100$, is as deterministic as possible.
-Unlike the totally random component from Figure~\ref{fig:randomError}, these
+the given interface, $y \ge x-100 \wedge y < x+100$, is as deterministic as
+possible. Unlike the totally random component from Figure~\ref{fig:randomError}, these
 components can be validly composed by restricting the acceptable inputs $x$
 that can be provided to the composite. In isolation, static analysis on this
 component will declare it to be error-free. \begin{figure}[htbp]
