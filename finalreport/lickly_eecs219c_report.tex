@@ -135,11 +135,11 @@ If we view the contract as simply specifying a relation between the inputs and
 the outputs, $R(\phi) \subseteq X \times Y$, then A being more deterministic
 than B simply means that $R(\phi_A) \subset R(\phi_B)$
 
-We can get the input assumptions from a relational interface by
-projecting the relation onto only the input variables.  In terms of
-the logical formula, this can be achieved by simply extistentally quantifying
-out the output variables.  We write the input assumptions of contract $\phi$ as
-$in(\phi)$.
+% We can get the input assumptions from a relational interface by
+% projecting the relation onto only the input variables.  In terms of
+% the logical formula, this can be achieved by simply extistentally quantifying
+% out the output variables.  We write the input assumptions of contract $\phi$ as
+% $in(\phi)$.
 
 \subsection{Examples}
 Let us consider a component that performs a division operation.  In order to
@@ -173,14 +173,18 @@ numerator and the denominator.
 \label{fig:dividerNew}
 \end{figure}
 
-Notice that if we want to recover the input assumptions, we can simply project
-the contract onto the input variables by quantifying out the outputs.
-In this case, the input assumptions are 
+Notice that if we want to recover the input assumptions from a relational
+interface, we can simply project the contract onto the input variables by
+quantifying out the outputs. In this case, the input assumptions are 
 \[
 \exists z : y \ne 0 \wedge z = x / y 
 \]
 This is equivalent to simply $y \ne 0$, which was exactly the input assumption
 that we had previously.
+
+In general, for a relational contract $\phi$, we will define the \emph{input
+assumptions} of $\phi$, $in(\phi)$ to be the results of this projection onto
+the input variables.
 
 \section{Solution}
 Since there is ongoing research on creating industrial-grade SMT solvers,
