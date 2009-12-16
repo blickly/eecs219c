@@ -330,15 +330,32 @@ input requirements of the composite interface. Then any run using a value
 within the jitter of zero would be flagged as incompatible, even if that
 particular run caused no error in any component.
 
-Another possible addition would be to allow a model builder to specify the
-interface of a composite and check that that specification were valid.
-In this case, it would be acceptable for the user-specified interface to be
-more abstract than the inferred interface, since the model designer is free to
-abstract away details that he or she knows to be irrelevant. Thus, the
-automated check would verify that the inferred interface refine the specified
-interface. Interface theories specify formally what it means for one interface
-to refine another, like they do for composition, but informally, it simply
-means that the new interface can be used in place of the refined interface.
+The interface theory also defines a notion of one interface \emph{refining}
+another, which simply means that refining interface can be used in place of the
+refined interface in any environment.
+Formally, the definition is that $I'$ refines $I$ if the following two
+conditions hold:
+\begin{align*}
+in(\phi) \implies in(\phi') \\
+in(\phi) \wedge \phi' \implies \phi
+\end{align*}
+where $\phi$ and $\phi'$ are the contracts of $I$ and $I'$ respectively, and
+$in(\phi)$ gives the input assumptions for the contract by projecting onto the
+input variables.
+
+It would be useful to allow model builders to check that one model
+refined another.  One concrete use case would be in comparing the
+inferred interface of a composite actor to a desired interface given by the
+model builder.  If the inferred interface does not refine the given interface,
+then there exists a modeling error.  This is because this would mean that the
+composition of interfaces allows some behavior that the desired interface did
+not.
+%
+This can also be checked algorithmically by an SMT solver, by simply checking
+that the conjunction on conditions of refinement between the two interfaces is
+a tautology.  As an additional benefit, the SMT solver could produce a
+counterexample, consisting of trace of the components that does conform to the
+composite specification.
 
 \section{Conclusion}
 Here, we have presented an infrastructure for verifying interfaces of
@@ -350,11 +367,16 @@ compatibility of interfaces for composition, and work on checking refienment
 and run-time conformance is in progress. In addition, our work is the first to
 present a general infrastructure for interfaces in Ptolemy~II.
 
-There are many possible, more long term extensions to this work, such as
-guessing and learning interfaces of atomic components by observing runtime
-behavior, or checking statically that the Java definition of an actor meets
-its interface.
-% FIXME: Or more...
+There are many possible, more long term extensions to this work. There are
+likely situations where users would prefer to see in inferred interface,
+rather than simply make queries on it.  In the current tool, while they can
+view inferred interfaces, they are not simplified, and often too complicated to
+be easily understood.  Existing tools, such as QEPCAD~\cite{qepcad}, can
+simplify logical formulas and remove quantifiers, and could likely help here.
+Other possible extensions include observing behavior of components that have no
+specified or inferrable interfaces, and guessing and learning potential
+interfaces; or checking statically that the Java definition of an atomic actor
+does not violate its interface.
 
 Finally, one of the most important uses of this tool is for developing new
 interface theories. Using this tool allows for rapid experiment with various
