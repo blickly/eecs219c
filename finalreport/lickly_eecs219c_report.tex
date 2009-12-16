@@ -69,15 +69,8 @@ whether interfaces were composable, making this process faster and less
 error-prone.
 
 \section{Background/Related Work}
-In~\cite{relationalInterfaces}, Tripakis et. al. propose a relational type of
-interface that can capture interactions between inputs and outputs.
-This allows more complex behaviors to be captured, but it also means that
-working with the interface theory can be more difficult.
-
-Here, we aim to build a system for automatically checking the satisfiability
-of such interfaces and to aid in composing them.
-We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling
-tool that contains supports hierarchical compositions of heterogeneous components.
+There are a variety of interface theories\ldots
+\fixme{Check emails from Stavros} %FIXME
 
 In addition, there are a variety of tools that attempt to combine static analysis
 with concrete executions.
@@ -97,7 +90,16 @@ counterexamples.  The tool terminates if it is either able to prove the property
 on an abstraction of the program, or it finds a concrete counterexample to the
 program property.
 
-\fixme{Check emails from Stavros} %FIXME
+In~\cite{relationalInterfaces}, Tripakis et. al. propose a relational type of
+interface that can capture interactions between inputs and outputs.
+This allows more complex behaviors to be captured, but it also means that
+working with the interface theory can be more difficult.
+
+Here, we aim to build a system for automatically checking the satisfiability
+of such interfaces and to aid in composing them.
+We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling
+tool that contains supports hierarchical compositions of heterogeneous components.
+
 
 \section{Problem Definition}
 We see our current problem, and the resulting solution, as affecting two
@@ -133,6 +135,12 @@ If we view the contract as simply specifying a relation between the inputs and
 the outputs, $R(\phi) \subseteq X \times Y$, then A being more deterministic
 than B simply means that $R(\phi_A) \subset R(\phi_B)$
 
+We can get the input assumptions from a relational interface by
+projecting the relation onto only the input variables.  In terms of
+the logical formula, this can be achieved by simply extistentally quantifying
+out the output variables.  We write the input assumptions of contract $\phi$ as
+$in(\phi)$.
+
 \subsection{Examples}
 Let us consider a component that performs a division operation.  In order to
 function, it requires that its environment not provide a zero-valued input as
@@ -149,7 +157,7 @@ restrictions as shown in Figure~\ref{fig:dividerOld}.
 \caption{A non-realtional interface of a divider actor.}
 \label{fig:dividerOld}
 \end{figure}
-
+\cite{ptII}
 In a relational interface theory, however, we can express interfaces that are
 more deterministic than this.  In fact, since this is a completely
 deterministic component, whose behavior is uniquely determined by its (valid)
@@ -174,28 +182,11 @@ In this case, the input assumptions are
 This is equivalent to simply $y \ne 0$, which was exactly the input assumption
 that we had previously.
 
-% FIXME:  Add explainations of what cascade composition and feedback
-% composition mean in terms of theory:
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\columnwidth]{figs/cascadeComp} 
-\caption{A composite actor formed by the cascade composition of two contained
-actors.}
-\label{fig:cascadeComp}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering % FIXME: Edit this graphic to move director to side
-\includegraphics[width=\columnwidth]{figs/feedbackComp}
-\caption{A composite actor formed by adding feedback to its contained actor.}
-\label{fig:feedbackComp}
-\end{figure}
-
 \section{Solution}
 Since there is ongoing research on creating industrial-grade SMT solvers,
 we elect to integrate an existing solver rather than create one from scratch.
 Our approach leverages the Yices\cite{yices} SMT solver, interfacing it to
-work in the Ptolemy II\cite{ptII} modeling framework.
+work in the Ptolemy II modeling framework.
 
 We create a new Ptolemy~II director, called the
 \texttt{InterfaceCheckerDirector}, which checks the validity of the interfaces of
@@ -211,11 +202,100 @@ quantifiers, which are absent in the Ptolemy expression language.
 
 The details of the interface theory itself are encapsulated in the
 \texttt{RelationalInterface} class, allowing for different interface theories
-to be added later, although currently only the relational interface theory
-of~\cite{relationalInterfaces} is supported. Interface theories themselves must
-handle cascade composition from one interface to another, parallel composition
-of two interfaces, and feedback composition. In cases where these compositions
-are not possible, the interface theory must throw an exception.
+to be added later.  This class defines the methods for composing interfaces
+with each other in different types of ways, adding feedback, and exporting the
+interface definition to a format that Yices can check. In cases where these
+compositions or feedbacks are not possible, the interface theory can throw an
+exception.
+%
+In this intial implementation, only the relational interface theory
+of~\cite{relationalInterfaces} is supported, but we hope to construct and
+experiment with many variations and new theories using this infrastructure.
+
+\subsection{Supported Operations}
+One of the most critical opertaions that we want to support is that of
+inferring the composition of components.  Ptolemy II includes a special type
+of actor whose definition is a composition of other actors, the
+\texttt{CompositeActor}. We can then exhibit our different types of inferrence
+by simply specifying them as fallback options for determining the interfaces of
+\texttt{CompositeActor}s that do not have interface annotations.
+
+Broadly, there are three types of composition in which we are interested.
+%
+The simplest type of composition is parallel composition.  When we want to
+compose two interfaces in parallel, like the \fixme{think of something} in
+Figure~\ref{fig:parallelComp}, then all we need to do is combine the two
+component interfaces.  Formally, the inferred contract is simply the conjuntion
+of the component constracts.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]%{figs/parallelComp}
+{figs/cascadeComp} %FIXME: add this model/picture
+\caption{A composite actor formed by the parallel composition of two contained
+actors.}
+\label{fig:parallelComp}
+\end{figure}
+
+A slightly more complex case arises when there is a feedback connection from an
+output of a component back to its input. There is a resriction on when this can
+happen, since some types of feedback, like connecting a not gate to itself, do
+not make sense. In the theory used here, only feedback connections in which the
+input port is unrestricted are allowed. We can check this condition
+syntactically, without needing to use the SMT solver.  When a feedback
+connection is allowed, such as in Figure~\ref{fig:feedbackComp}, the inferred
+contract simply needs to add a constraint that the connected ports are equal.
+In our example, when the output port $z$ is connected to the input port $x$, we
+simply conjoin the original contract with the constraint $x=z$.
+
+\begin{figure}[htbp]
+\centering % FIXME: Edit this graphic to move director to side
+\includegraphics[width=\columnwidth]{figs/feedbackComp}
+\caption{A composite actor formed by adding feedback to its contained actor.}
+\label{fig:feedbackComp}
+\end{figure}
+
+The most complicated case arises when we have cascading composition, or
+composition in which the outputs of one interface are the inputs to the next.
+In order to make these compositions, we need to first ensure that the output of
+the first interface will always be a valid input to the second interface.  We
+treat the component interfaces as black boxed over which we have no direct
+control.  The only way that we can affect the components is through restricting
+the valid inputs to the composite interface.
+%
+For example, in the case of Figure~\ref{fig:cascadeComp}, we need to ensure
+that the output of $LeftActor$ is valid input to $RightActor$.  Since our
+interface of $LeftActor$ makes no guarantees about what output it will produce
+when the input is anything other than 1, it could potentially produce 0. Thus,
+we must disallow any input other than 1, and our composite interface must have
+the input assumption that $in = 1$.
+
+\begin{figure}[htbp]
+\centering %FIXME: Change y = x + 1 to x = 1 => y = 1
+\includegraphics[width=\columnwidth]{figs/cascadeComp} 
+\caption{A composite actor formed by the cascade composition of two contained
+actors.}
+\label{fig:cascadeComp}
+\end{figure}
+
+Formally, the composition interface is defined in the following way. In order
+to cascade compose the output of interface $I_1$ into the input of interface
+$I_2$, we get the following composite interface contract.
+\[
+\phi_1 \wedge \phi_2 \wedge \theta \wedge \forall Y: \Phi
+\]
+where $\phi_1$ and $\phi_2$ are the contracts of the components, $\theta$ are
+the constraints that the connected outputs and inputs are equal, $Y$ are all
+the ports other than the inputs to the composite interface, and $\Phi$ is the
+restriction on the inputs of the composite interface to make the composition valid.
+$\Phi$ is given as follows:
+\[
+(\phi_1 \wedge \theta) \implies in(\phi_2)
+\]
+This simply means that for all possible responses to the inputs that meet the
+contract of the first interface and the connections, the input assumptions to
+the second interface are met.
+
 
 \subsection{Usage Examples}
 This section chronicles possible use cases of the new interface analysis from a
@@ -355,8 +435,7 @@ in(\phi) \implies in(\phi') \\
 in(\phi) \wedge \phi' \implies \phi
 \end{align*}
 where $\phi$ and $\phi'$ are the contracts of $I$ and $I'$ respectively, and
-$in(\phi)$ gives the input assumptions for the contract by projecting onto the
-input variables.
+$in(\phi)$ gives the input assumptions.
 
 It would be useful to allow model builders to check that one model
 refined another.  One concrete use case would be in comparing the
