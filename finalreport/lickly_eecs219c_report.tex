@@ -20,9 +20,11 @@
 \maketitle
 
 \begin{abstract}
+% FIXME: Abstract missing!
 \end{abstract}
 
-\section{Introduction/Motivation}
+\section{Introduction}
+% FIXME: Flesh out this section
 Component-based design allows large systems to be built more efficiently,
 enforcing modularity that promotes reuse of existing components with
 know behaviors, and allows diverse groups of developers create components
@@ -70,7 +72,7 @@ error-prone.
 
 \section{Background/Related Work}
 There are a variety of interface theories\ldots
-\fixme{Check emails from Stavros} %FIXME
+\fixme{Check emails from Stavros} %FIXME:  Add info about other intrface theorys
 
 In addition, there are a variety of tools that attempt to combine static analysis
 with concrete executions.
@@ -95,26 +97,35 @@ interface that can capture interactions between inputs and outputs.
 This allows more complex behaviors to be captured, but it also means that
 working with the interface theory can be more difficult.
 
+Ptolemy II~\cite{ptII} is software system designed to facilitate experimentation
+with actor-oriented modeling, and supports hierarchical compositions of
+heterogeneous components.  Ptolemy~II has support for specifying interface
+automata~\cite{Alfaro01interfaceautomata}, a type of interface that is specified
+opertaionally, but this work is restricted to its own domain, and cannot be used
+to annotate and check other actor models. Here, we aim to take a more denontatil
+view of interfaces, concentrating on interfaces whose behavior is specified by
+formulae. Ptolmey does support some types of semantic annotations at the actor
+level, such as the causality interfaces presented
+in~\cite{ZhouLee08_CausalityInterfacesForActorNetworks}, but this mechanism is
+fairly specific to providing information about model time delays needed in the
+PTIDES model of computation.
+
+\section{Approach} %FIXME: Beef this up?
 Here, we aim to build a system for automatically checking the satisfiability
-of such interfaces and to aid in composing them.
-We choose to base our work on Ptolemy II~\cite{ptII}, an actor-based modeling
-tool that contains supports hierarchical compositions of heterogeneous components.
+of such interfaces and to aid in composing them. We choose to base our work on
+Ptolemy II since it already has a large library of actor models, and provides a
+flexible platform for experimentation.
 
-
-\section{Problem Definition}
 We see our current problem, and the resulting solution, as affecting two
 parties:
-1. model designers, who would like to verify properties of their models;
-and
+1. model designers, who would like to use interface theories verify properties
+of their models; and
 2. theory designers, who would like to develop new interface theories.
 %
 Any solution must keep both parties in mind, making sure that properties
 can be specified intuitively and necessary features for property proving are
 provided, as well as abstracting out details of the individual interface theory
 so that it can be changed later.
-
-\section{Approach}
-Create a domain for Ptolemy II that \dots
 
 \subsection{Definitions}
 We define a deterministic interface to be one for which the outputs are
@@ -467,12 +478,13 @@ There are many possible, more long term extensions to this work. There are
 likely situations where users would prefer to see in inferred interface,
 rather than simply make queries on it.  In the current tool, while they can
 view inferred interfaces, they are not simplified, and often too complicated to
-be easily understood.  Existing tools, such as QEPCAD~\cite{qepcad}, can
-simplify logical formulas and remove quantifiers, and could likely help here.
-Other possible extensions include observing behavior of components that have no
-specified or inferrable interfaces, and guessing and learning potential
-interfaces; or checking statically that the Java definition of an atomic actor
-does not violate its interface.
+be easily understood.  Existing tools, such as QEPCAD~\cite{qepcad}, can simplify
+logical formulas and remove quantifiers be performing partial cylindrical
+algebraic decomposition, and could likely help here. Other possible extensions
+include observing behavior of components that have no specified or inferrable
+interfaces, and guessing and learning potential interfaces; or checking
+statically that the Java definition of an atomic actor does not violate its
+interface.
 
 Finally, one of the most important uses of this tool is for developing new
 interface theories. Using this tool allows for rapid experiment with various
@@ -482,11 +494,15 @@ interface theory for another, which intends to make it easy to experiment with
 new theories altogether.
 
 \acks
-
-Acknowledgments, if needed.
-
-% We recommend abbrvnat bibliography style.
-
+\if0 %FIXME Add at end
+This work is supported in part by the Center for Hybrid and Embedded Software
+Systems (CHESS), at UC Berkeley, which recieves support from the National Science
+Foundation (NSF awards \#0720882 (CSR-EHS: PRET) and \#0720841 (CSR-CPS)), the
+U.S. Army Research Office (ARO \#W911NF-07-2-0019), the U.S. Air Force Office of
+Scientific Research (MURI \#FA9550-06-0312), the Air Force Research Lab (AFRL),
+the State of California Micro Program, and the following companies: Agilent,
+Bosch, Lockheed-Martin, National Instruments, Thales and Toyota.
+\fi
 \bibliographystyle{abbrvnat}
 \bibliography{refs}
 
