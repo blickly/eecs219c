@@ -33,6 +33,7 @@ of the individual components.
 Interface theories~\cite{interfaceTheories} specify what properties components
 require of their environments, as well as how and when they can be abstracted,
 composed, or refined.
+
 \subsection{Motivation}
 Often, interface theories have their precise semantics captured only in the
 English text of the works in which they are published. Rather than reading these
@@ -47,28 +48,24 @@ properties of the components, and the interface theories tell us how to make
 the compositions.
 
 A typical example of where this type of tool would be useful would be in the
-early stages of system specification.
-Different designers could specify certain aspects of components to built that
-they would guarantee.
-This specification could be done much more quickly than building even a
-prototype component, but it would still be useful for specification.
-This tool would then be able to check that these components can be composed.
-If it happens that this requirement cannot be met, then the design must be
-reconsidered.
-This may point to a fundamental design flaw, but it may also simply mean that
-some designers must provide stronger guarantees of what their components will
-do.
+early stages of system specification. Different designers could specify certain
+aspects of components to built that they would guarantee. This specification
+could be done much more quickly than building even a prototype component, but
+it would still be useful for specification. This tool would then be able to
+check that these components can be composed. If it happens that this
+requirement cannot be met, then the design must be reconsidered. This may point
+to a fundamental design flaw, but it may also simply mean that some designers
+must provide stronger guarantees of what their components will do.
 
 For example, say we have two components, as well as some abstractions that
 make up their interfaces, and be interested in the composition of those two
-interfaces.
-One problem that might occur in this scenario is as follows: if the interfaces
-of the original components are too abstract, then the interfaces may not be
-composable.
-In this case, the developer may need to come up with a more concrete
-interface, whose behavior is closer to the behavior of the realized component.
-It would also be nice if we could algorithmically check whether interfaces
-were composable, making this process faster and less error-prone.
+interfaces. One problem that might occur in this scenario is as follows: if the
+interfaces of the original components are too abstract, then the interfaces
+may not be composable. In this case, the developer may need to come up with a
+more concrete interface, whose behavior is closer to the behavior of the
+realized component. It would also be nice if we could algorithmically check
+whether interfaces were composable, making this process faster and less
+error-prone.
 
 \section{Background/Related Work}
 In~\cite{relationalInterfaces}, Tripakis et. al. propose a relational type of
@@ -84,7 +81,8 @@ tool that contains supports hierarchical compositions of heterogeneous component
 \fixme{Check emails from Stavros}
 
 This work also builds on other approaches that combine static analyses with
-runtime checking, such as concolic testing, \dots \fixme{Add references from CS265 class}.
+runtime checking, such as concolic testing, \dots
+\fixme{Add references from CS265 class}.
 
 \section{Approach}
 Create a domain for Ptolemy II that \dots
@@ -129,27 +127,24 @@ work in the Ptolemy II\cite{ptII} modeling framework.
 
 We do this through the use of a new Ptolemy~II director, called the
 \texttt{InterfaceCheckerDirector}, which checks for the validity of interfaces
-in the actors of a model.
-We allow each actor in the model to be annotated with a parameter to specify
-its interface.
-Here we supporting both native Ptolemy~II expressions, which have a C-like
-syntax, and LISP-style string expressions in the Yices input language.
-The Ptolemy expressions must be boolean valued, with a true value meaning the
-interface is satisfied, and they are searched for by looking for parameters of
-actors named $\_interfaceExpr$.
-The Yices inputs language interfaces require string-valued parameters names
-$\_interfaceStr$, and allow richer expressions to be used.
-This is because the Yices input language supports quantifiers, which are
-absent in the Ptolemy expression language.
+in the actors of a model. We allow each actor in the model to be annotated with
+a parameter to specify its interface. Here we supporting both native Ptolemy~II
+expressions, which have a C-like syntax, and LISP-style string expressions in
+the Yices input language. The Ptolemy expressions must be boolean valued, with
+a true value meaning the interface is satisfied, and they are searched for by
+looking for parameters of actors named $\_interfaceExpr$. The Yices inputs
+language interfaces require string-valued parameters names $\_interfaceStr$,
+and allow richer expressions to be used. This is because the Yices input
+language supports quantifiers, which are absent in the Ptolemy expression
+language.
 
 The details of the interface theory itself are encapsulated in the
 \texttt{RelationalInterface} class, allowing for different interface theories
 to be added later, although currently only the relational interface theory
-of~\cite{relationalInterfaces} is supported.
-Interface theories themselves must handle cascade composition from one
-interface to another, parallel composition of two interfaces, and feedback
-composition.  In cases where these compositions are not possible, the
-interface theory must throw an exception.
+of~\cite{relationalInterfaces} is supported. Interface theories themselves must
+handle cascade composition from one interface to another, parallel composition
+of two interfaces, and feedback composition. In cases where these compositions
+are not possible, the interface theory must throw an exception.
 %FIXME: Make this true
 
 \subsection{Examples}
@@ -175,8 +170,12 @@ In the first attempt, the user choses the contract
 y >= 0
 \]
 for the absolute value.
-<!--If we consider this formula as a relation, it contains all pairs of inputs and outputs such that the input is not simultaneously zero with the output non-zero.-->  Clearly this is an overapproximation of absolute value, since it doesn't take into account the input to the actor.
-For the inverter, the user choses the contract
+<!--If we consider this formula as a relation,
+it contains all pairs of inputs and outputs such that
+the input is not simultaneously zero with the output non-zero.-->
+Clearly this is an overapproximation of absolute value, since it doesn't take
+into account the input to the actor. For the inverter, the user choses the
+contract
 \[
 x \ne 0
 \]
@@ -187,7 +186,8 @@ that overapproximates.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{figs/cascadeComp} 
-\caption{A composite actor formed by the cascade composition of two contained actors.}
+\caption{A composite actor formed by the cascade composition of two contained
+actors.}
 \label{fig:cascadeComp}
 \end{figure}
 
