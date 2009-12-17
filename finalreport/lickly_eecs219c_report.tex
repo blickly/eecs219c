@@ -20,7 +20,20 @@
 \maketitle
 
 \begin{abstract}
-% FIXME: Abstract missing!
+Interface theories provide useful machinery for proving properties of systems
+and components, such as composition, refinement, shared refinement, and
+feedback. One problem is that the details of the theories themselves are
+ususally available only as a static specification, although many users
+could benefit from being able to use an interfative environment for
+experimenting with interface theories.
+
+Here, we present just such a environement built on top of the Ptolemy~II
+software framework. We have two primary groups of users in mind. The first are
+system designers who are interested in leveraging interface theories to prove and test
+properties of their models and systems.  The second are interface designers who
+would like a maleable framework that allows them to experiment with new
+interface theories, gaining an intuition for their theories by first
+experimenting with new extensions and features.
 \end{abstract}
 
 \section{Introduction}
@@ -32,10 +45,8 @@ individually and be composed into a final system.
 
 Interface theories~\cite{interfaceTheories} specify what properties components
 require of their environments, as well as how and when they can be abstracted,
-composed, or refined.
-This often allows proving
-properties of the overall system by combining properties of the individual
-components.
+composed, or refined. This often allows proving properties of the overall system
+by combining properties of the individual components.
 
 \subsection{Motivation}
 Often, interface theories have their precise semantics captured only in the
@@ -71,8 +82,23 @@ whether interfaces were composable, making this process faster and less
 error-prone.
 
 \section{Background/Related Work}
-There are a variety of interface theories\ldots
-\fixme{Check emails from Stavros} %FIXME:  Add info about other intrface theorys
+There are a variety of interface theories, beginning with the work of de Alfaro
+and Henzinger~\cite{interfaceTheories}, and spawning several variants.  These
+cast the view of components in a game-theoretic perspective, in terms of a game
+between the component and its environment.  Here neither the component nor the
+environment can control the other, but they may specify what they require of
+the other.  The \emph{input assumptions} are the component's requirements of the
+environment, which if violated make the environment lose.  The \emph{output
+guarantees} are similarly the behavior that will cause the component to lose
+if it does not satisfy.  We borrow there terms here.
+
+Broy presents a theory of compositional refinement that deals with realations on
+sequences produced by components~\cite{broy:1997:compositionalRefinement}. While
+not billed as an interface theory, it shares many common elements, defining
+notions of sequential composition, parallel compostion, and feedback. His theory
+allows relations between inputs and outputs, but in order to do so it relates
+sequences rather than values, and must also include notions of causality in order
+to achieve feedback.
 
 In addition, there are a variety of tools that attempt to combine static analysis
 with concrete executions.
@@ -238,10 +264,10 @@ by simply specifying them as fallback options for determining the interfaces of
 Broadly, there are three types of composition in which we are interested.
 %
 The simplest type of composition is parallel composition.  When we want to
-compose two interfaces in parallel, like the \fixme{think of something} in
-Figure~\ref{fig:parallelComp}, then all we need to do is combine the two
-component interfaces.  Formally, the inferred contract is simply the conjuntion
-of the component constracts.
+compose two interfaces in parallel, such as the independent components of the
+Doubler and Halver in Figure~\ref{fig:parallelComp}, then all we need to do is
+combine the two component interfaces.  Formally, the inferred contract is simply
+the conjuntion of the component constracts.
 
 \begin{figure}[htbp]
 \centering
